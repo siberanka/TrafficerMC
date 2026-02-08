@@ -38,9 +38,23 @@ function storeinfo() {
   return store.get('config')
 }
 
-let clientVersion = 3.1
+let clientVersion = 3.2
 
 let playerList = []
+
+function resolveBotVersion(version) {
+  if (!version) return
+
+  const match = version.match(/^1\.21\.(\d+)$/)
+  if (match) {
+    const patch = parseInt(match[1], 10)
+    const supportedPatches = [0, 1, 3, 4, 5, 6, 8, 9]
+    const nearestPatch = [...supportedPatches].reverse().find((value) => patch >= value) ?? 0
+    return nearestPatch === 0 ? '1.21' : `1.21.${nearestPatch}`
+  }
+
+  return version
+}
 
 function createMainWindow() {
   const mainWindow = new BrowserWindow({
@@ -361,7 +375,7 @@ function getBotInfo(botName) {
     host: serverHost,
     port: parsedPort,
     username: botName,
-    version: storeinfo().value.version,
+    version: resolveBotVersion(storeinfo().value.version),
     auth: storeinfo().value.authType,
     hideErrors: true,
     joinMessage: storeinfo().value.joinMessage,
