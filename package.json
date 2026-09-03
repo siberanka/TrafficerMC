@@ -1,11 +1,11 @@
 {
   "name": "trafficermc",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "description": "A Minecraft botting tool with Anti-AFK, Chat spammer, Inventory/Chest manager features.",
   "main": "./out/main/index.js",
   "author": "RattlesHyper",
   "scripts": {
-    "test": "node test/resolveVersion.test.js && node test/autoAuth.test.js && node test/proxy.test.js",
+    "test": "node test/resolveVersion.test.js && node test/autoAuth.test.js && node test/proxy.test.js && node test/localServer.test.js",
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "start": "electron-vite preview",
@@ -21,6 +21,7 @@
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
     "electron-store": "^8.2.0",
+    "lodash.merge": "^4.6.2",
     "minecraft-data": "^3.115.0",
     "mineflayer": "^4.38.0",
     "socks": "^2.8.3",

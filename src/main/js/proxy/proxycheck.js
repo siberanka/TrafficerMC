@@ -1,6 +1,6 @@
-const mc = require('minecraft-protocol')
-import { connection } from './proxyhandler'
-import { salt } from '../misc/utils'
+import mc from 'minecraft-protocol'
+import { connection } from './proxyhandler.js'
+import { salt } from '../misc/utils.js'
 
 export function checkProxy(
   proxyType,

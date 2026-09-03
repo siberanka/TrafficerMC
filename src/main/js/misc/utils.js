@@ -1,4 +1,12 @@
-import { BrowserWindow } from 'electron'
+function getBrowserWindow() {
+  try {
+    // eslint-disable-next-line no-undef
+    const electron = typeof require !== 'undefined' ? require('electron') : null
+    return electron ? electron.BrowserWindow : null
+  } catch {
+    return null
+  }
+}
 
 export function salt(length) {
   var result = ''
@@ -238,26 +246,21 @@ export function genName() {
 }
 
 export function sendEvent(username, event, message) {
-  const info = {
-    id: username,
-    event: event,
-    message: message
-  }
-  BrowserWindow.getAllWindows()[0].webContents.send('botEvent', info)
+  const win = getBrowserWindow()?.getAllWindows?.()?.[0]
+  if (!win) return
+  win.webContents.send('botEvent', { id: username, event, message })
 }
 
 export function proxyEvent(proxy, event, message, count) {
-  const info = {
-    proxy: proxy,
-    event: event,
-    message: message,
-    count: count
-  }
-  BrowserWindow.getAllWindows()[0].webContents.send('proxyEvent', info)
+  const win = getBrowserWindow()?.getAllWindows?.()?.[0]
+  if (!win) return
+  win.webContents.send('proxyEvent', { proxy, event, message, count })
 }
 
 export function notify(title, body, type, img, keep) {
-  BrowserWindow.getAllWindows()[0].webContents.send('notify', title, body, type, img, keep)
+  const win = getBrowserWindow()?.getAllWindows?.()?.[0]
+  if (!win) return
+  win.webContents.send('notify', title, body, type, img, keep)
 }
 
 export function cleanText(string) {

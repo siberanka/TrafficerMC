@@ -40,7 +40,7 @@ function storeinfo() {
   return store.get('config')
 }
 
-let clientVersion = 3.4
+let clientVersion = 3.5
 
 let playerList = []
 
@@ -220,11 +220,20 @@ ipcMain.on('btnClick', (event, btn) => {
 
 function setProxy() {
   const pType = storeinfo().value.proxyType || 'socks5'
-  scrapeProxy(pType)
+  const pSource = storeinfo().value.proxySource || 'all'
+  const pAnonymity = storeinfo().value.proxyAnonymity || 'all'
+  const pCustomUrls = storeinfo().value.customProxyUrls || ''
+
+  scrapeProxy({
+    proxyType: pType,
+    proxySource: pSource,
+    proxyAnonymity: pAnonymity,
+    customProxyUrls: pCustomUrls
+  })
     .then((result) => {
       const count = result ? result.trim().split(/\r?\n/).filter(Boolean).length : 0
       proxyEvent('', 'scraped', result, '')
-      notify('Success', `Downloaded ${count} live ${pType.toUpperCase()} proxies!`, 'success')
+      notify('Success', `Downloaded ${count} live ${pType.toUpperCase()} proxies (${pSource})!`, 'success')
     })
     .catch((err) => {
       console.log(err)
