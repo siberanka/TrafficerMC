@@ -22,6 +22,8 @@ import EventEmitter from 'node:events'
 const Store = require('electron-store')
 const mineflayer = require('mineflayer')
 import { antiafk } from './js/misc/antiafk'
+import { autoAuth } from './js/misc/autoAuth'
+import { resolveBotVersion } from './js/misc/versionResolver'
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 const botApi = new EventEmitter()
@@ -38,23 +40,9 @@ function storeinfo() {
   return store.get('config')
 }
 
-let clientVersion = 3.2
+let clientVersion = 3.3
 
 let playerList = []
-
-function resolveBotVersion(version) {
-  if (!version) return
-
-  const match = version.match(/^1\.21\.(\d+)$/)
-  if (match) {
-    const patch = parseInt(match[1], 10)
-    const supportedPatches = [0, 1, 3, 4, 5, 6, 8, 9]
-    const nearestPatch = [...supportedPatches].reverse().find((value) => patch >= value) ?? 0
-    return nearestPatch === 0 ? '1.21' : `1.21.${nearestPatch}`
-  }
-
-  return version
-}
 
 function createMainWindow() {
   const mainWindow = new BrowserWindow({
@@ -496,6 +484,12 @@ function newBot(options) {
       sendEvent(options.username, 'authmsg', data.user_code)
     }
   })
+
+  const isAutoAuth = storeinfo()?.boolean?.autoAuth ?? false
+  const authPassword = storeinfo()?.value?.authPassword || 'trafficermc123a'
+  if (isAutoAuth) {
+    bot.loadPlugin((b) => autoAuth(b, { enabled: true, password: authPassword }))
+  }
 
   let hitTimer = 0
 

@@ -7,3 +7,10 @@ package-lock.json
 .vscode
 .idea
 *.iml
+*.jar
+test-server/
+test_server/
+server/
+run/
+cache/
+logs/
