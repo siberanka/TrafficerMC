@@ -40,7 +40,7 @@ function storeinfo() {
   return store.get('config')
 }
 
-let clientVersion = 3.3
+let clientVersion = 3.4
 
 let playerList = []
 
@@ -207,9 +207,10 @@ ipcMain.on('btnClick', (event, btn) => {
       proxyEvent('', 'stop', '', '')
       break
     case 'proxyScrape':
+    case 'proxyDownloadWeb':
       if (storeinfo().value.proxyType === 'none')
-        return notify('Error', 'Select proxy type', 'error')
-      notify('Info', 'Scraping proxies...', 'success')
+        return notify('Error', 'Select proxy type (HTTP, SOCKS4, SOCKS5)', 'error')
+      notify('Info', 'Downloading live proxies from web...', 'success')
       setProxy()
       break
     default:
@@ -218,9 +219,12 @@ ipcMain.on('btnClick', (event, btn) => {
 })
 
 function setProxy() {
-  scrapeProxy(storeinfo().value.proxyType)
+  const pType = storeinfo().value.proxyType || 'socks5'
+  scrapeProxy(pType)
     .then((result) => {
+      const count = result ? result.trim().split(/\r?\n/).filter(Boolean).length : 0
       proxyEvent('', 'scraped', result, '')
+      notify('Success', `Downloaded ${count} live ${pType.toUpperCase()} proxies!`, 'success')
     })
     .catch((err) => {
       console.log(err)

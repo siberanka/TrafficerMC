@@ -105,7 +105,6 @@
                     <option value="offline">Cracked</option>
                     <option value="microsoft">Microsoft</option>
                     <option value="easymc">EasyMC</option>
-                    <option value="altening" disabled>TheAltening</option>
                   </select>
                 </div>
 
@@ -226,9 +225,6 @@
                   <li class="tab-2 control-tab">Look</li>
                   <li class="tab-2 control-tab">AntiAFK</li>
                   <li class="tab-2 control-tab">KillAura</li>
-                  <li class="tab-2 control-tab disabled">Interact</li>
-                  <li class="tab-2 control-tab disabled">Nuker</li>
-                  <li class="tab-2 control-tab disabled">Pathfinder</li>
                 </ul>
               </div>
 
@@ -381,22 +377,6 @@
                     <button id="btnAfkOff">Stop</button>
                   </div>
                 </div>
-                <div id="interact" class="control-tab" style="display: none">
-                  <p class="text">Interact [Premium]</p>
-
-                  <div class="flex mu-2">
-                    <p class="text-sm pr-4">Coords</p>
-                    <input id="interactCoords" type="text" placeholder="eg: 0 1 0" disabled />
-                  </div>
-                  <div class="space-h-f mu-2">
-                    <p class="text-sm">Mouse button</p>
-                  </div>
-
-                  <div class="space-h-f">
-                    <button id="btnInteractLeft">Left</button>
-                    <button id="btnInteractRight">Right</button>
-                  </div>
-                </div>
 
                 <div id="killaura" class="control-tab" style="display: none">
                   <p class="text">KillAura</p>
@@ -468,171 +448,6 @@
                       <input id="killauraToggle" type="checkbox" />
                       <span class="checkmark"></span>
                     </label>
-                  </div>
-                </div>
-
-                <div id="nuker" class="control-tab" style="display: none">
-                  <p class="text">Nuker [Premium]</p>
-                  <div class="mu-2">
-                    <div class="space-h-f">
-                      <p class="text-sm">Range</p>
-                    </div>
-
-                    <div class="slidecontainer space-h">
-                      <p class="text-sm-2">Up</p>
-                      <div class="flex">
-                        <p class="text-sm-2 pl-2">0</p>
-                        <input
-                          id="nukerRangeUp"
-                          type="range"
-                          min="0"
-                          max="6"
-                          value="0"
-                          class="slider"
-                        />
-                        <p class="text-sm-2 pl-2">6</p>
-                      </div>
-                    </div>
-
-                    <div class="slidecontainer space-h mu-2">
-                      <p class="text-sm-2">Down</p>
-                      <div class="flex">
-                        <p class="text-sm-2 pl-2">0</p>
-                        <input
-                          id="nukerRangeDown"
-                          type="range"
-                          min="0"
-                          max="6"
-                          value="0"
-                          class="slider"
-                        />
-                        <p class="text-sm-2 pl-2">6</p>
-                      </div>
-                    </div>
-
-                    <div class="slidecontainer space-h mu-2">
-                      <p class="text-sm-2">Left</p>
-                      <div class="flex">
-                        <p class="text-sm-2 pl-2">0</p>
-                        <input
-                          id="nukerRangeLeft"
-                          type="range"
-                          min="0"
-                          max="6"
-                          value="0"
-                          class="slider"
-                        />
-                        <p class="text-sm-2 pl-2">6</p>
-                      </div>
-                    </div>
-
-                    <div class="slidecontainer space-h mu-2">
-                      <p class="text-sm-2">Right</p>
-                      <div class="flex">
-                        <p class="text-sm-2 pl-2">0</p>
-                        <input
-                          id="nukerRangeRight"
-                          type="range"
-                          min="0"
-                          max="6"
-                          value="0"
-                          class="slider"
-                        />
-                        <p class="text-sm-2 pl-2">6</p>
-                      </div>
-                    </div>
-
-                    <div class="slidecontainer space-h mu-2">
-                      <p class="text-sm-2">Forward</p>
-                      <div class="flex">
-                        <p class="text-sm-2 pl-2">0</p>
-                        <input
-                          id="nukerRangeForward"
-                          type="range"
-                          min="0"
-                          max="6"
-                          value="0"
-                          class="slider"
-                        />
-                        <p class="text-sm-2 pl-2">6</p>
-                      </div>
-                    </div>
-
-                    <div class="slidecontainer space-h mu-2">
-                      <p class="text-sm-2">Back</p>
-                      <div class="flex">
-                        <p class="text-sm-2 pl-2">0</p>
-                        <input
-                          id="nukerRangeBack"
-                          type="range"
-                          min="0"
-                          max="6"
-                          value="0"
-                          class="slider"
-                        />
-                        <p class="text-sm-2 pl-2">6</p>
-                      </div>
-                    </div>
-
-                    <div class="mu-2 space-h-f">
-                      <p class="text-sm">Settings</p>
-                    </div>
-
-                    <div class="flex mu-2">
-                      <p class="text-sm-2">Target mode</p>
-                      <select id="nukerTargetMode">
-                        <option value="blacklist">Blacklist</option>
-                        <option value="whitelist">Whitelist</option>
-                      </select>
-                    </div>
-
-                    <div class="flex mu-2">
-                      <p class="text-sm-2 pr-4">Blocks</p>
-                      <input id="nukerBlocks" type="text" placeholder="dirt,glass,stone" />
-                    </div>
-
-                    <div class="flex mu-2">
-                      <p class="text-sm-2 pr-4">Blcks/tick</p>
-                      <input id="nukerBlocksPerTick" type="number" placeholder="1 (ticks)" />
-                    </div>
-
-                    <label class="containerCheckbox mu-2">
-                      Rotate
-                      <input id="nukerRotate" type="checkbox" />
-                      <span class="checkmark"></span>
-                    </label>
-
-                    <label class="containerCheckbox mu-2">
-                      Toggle
-                      <input id="nukerToggle" type="checkbox" />
-                      <span class="checkmark"></span>
-                    </label>
-                  </div>
-                </div>
-
-                <div id="pathfinder" class="control-tab" style="display: none">
-                  <p class="text">Pathfinder</p>
-                  <div class="mu-2">
-                    <div class="border">
-                      <div class="flex">
-                        <p class="tip pr-4 pl-2 border">#</p>
-                        <input
-                          id="pathFinderCommand"
-                          class="pl-2"
-                          type="text"
-                          placeholder="command"
-                          style="border: none"
-                        />
-                      </div>
-                    </div>
-
-                    <div class="mu-1">
-                      <p class="text-sm mu-4">Commands</p>
-                      <p class="text-sm-2 mu-2"><code>follow (player)</code>Follows a player</p>
-                      <p class="text-sm-2"><code>followLine (player)</code>Forms a line</p>
-                      <p class="text-sm-2"><code>goto X Y Z / X Z</code>Walks to a location</p>
-                      <p class="text-sm-2"><code>stop</code>Stops pathfinder</p>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -708,7 +523,7 @@
                       <option value="none">None</option>
                       <option value="socks4">SOCKS4</option>
                       <option value="socks5">SOCKS5</option>
-                      <option value="http" disabled>HTTP [P]</option>
+                      <option value="http">HTTP</option>
                     </select>
                   </div>
                 </div>
@@ -753,8 +568,13 @@
                   <span class="checkmark"></span>
                 </label>
 
-                <button id="proxyScrape" class="mu-1">Scrape</button>
-                <button id="proxyClearDupe">Clear Dupe</button>
+                <div class="mu-1">
+                  <button id="proxyDownloadWeb" class="button" style="width: 100%;">Download Web List</button>
+                </div>
+                <div class="space-h mu-1">
+                  <button id="proxyScrape">Scrape</button>
+                  <button id="proxyClearDupe">Clear Dupe</button>
+                </div>
 
                 <p class="text-sm mu-4">Proxy test</p>
 
@@ -920,24 +740,6 @@
             <input id="reconnectDelay" type="number" placeholder="Delay 100 (ms)" />
           </div>
 
-          <label class="containerCheckbox mu-2">
-            Physics [Premium]
-            <input id="togglePhysics" type="checkbox" checked disabled />
-            <span class="checkmark"></span>
-          </label>
-
-          <label class="containerCheckbox mu-2">
-            Map notifications [Premium]
-            <input id="mapNotifications" type="checkbox" disabled />
-            <span class="checkmark"></span>
-          </label>
-
-          <label class="containerCheckbox mu-2">
-            Accept resource packs [Premium]
-            <input id="acceptResourcePacks" type="checkbox" disabled />
-            <span class="checkmark"></span>
-          </label>
-
           <p class="text-sm mu-2">Logs</p>
 
           <label class="containerCheckbox mu-1">
@@ -952,37 +754,7 @@
             <span class="checkmark"></span>
           </label>
 
-          <label class="containerCheckbox mu-1">
-            Chat [Premium]
-            <input id="chatLogChat" type="checkbox" checked disabled />
-            <span class="checkmark"></span>
-          </label>
-
-          <label class="containerCheckbox mu-1">
-            Feedback [Premium]
-            <input id="feedbackLogChat" type="checkbox" checked disabled />
-            <span class="checkmark"></span>
-          </label>
-
-          <label class="containerCheckbox mu-1">
-            Join [Premium]
-            <input id="joinLogChat" type="checkbox" checked disabled />
-            <span class="checkmark"></span>
-          </label>
-
-          <label class="containerCheckbox mu-1">
-            Kicks [Premium]
-            <input id="kickLogChat" type="checkbox" checked disabled />
-            <span class="checkmark"></span>
-          </label>
-
-          <label class="containerCheckbox mu-1">
-            Auth message [Premium]
-            <input id="authLogChat" type="checkbox" checked disabled />
-            <span class="checkmark"></span>
-          </label>
-
-          <p class="text-sm">Config</p>
+          <p class="text-sm mu-2">Config</p>
 
           <button id="resetConfig" class="mu-1">Reset</button>
         </div>

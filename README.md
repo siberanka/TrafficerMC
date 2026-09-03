@@ -183,7 +183,7 @@ nVoid
 Danilo764
 ```
 # Proxies
-TrafficerMC currently support all protocols and Auth proxies, HTTP is premium only.
+TrafficerMC supports HTTP, SOCKS4, and SOCKS5 proxy protocols with full authentication support.
 ## What a proxy file would look like
 ```
 ProxyIP:ProxyPORT:Username:Password
