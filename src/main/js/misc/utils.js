@@ -29,39 +29,29 @@ export function botMode(mode) {
         viewDistance: 'tiny',
         plugins: {
           anvil: false,
-          block_actions: false,
-          blocks: false,
           book: false,
           boss_bar: false,
           breath: false,
           chest: false,
           command_block: false,
-          conversions: false,
           craft: false,
           creative: false,
           digging: false,
           enchantment_table: false,
-          entities: false,
           experience: false,
           explosion: false,
           fishing: false,
           furnace: false,
           generic_place: false,
-          health: false,
-          inventory: false,
-          loader: false,
           painting: false,
           particle: false,
           place_block: false,
           place_entity: false,
-          physics: false,
           rain: false,
           ray_trace: false,
           resource_pack: false,
           scoreboard: false,
-          simple_inventory: false,
           sound: false,
-          spawn_point: false,
           tablist: false,
           team: false,
           time: false,
@@ -70,7 +60,7 @@ export function botMode(mode) {
         }
       }
     default:
-      return
+      return {}
   }
 }
 

@@ -1,276 +1,296 @@
-let nbtSimplify = null
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const nbt = require('prismarine-nbt')
-  nbtSimplify = nbt.simplify
-} catch {
-  // Safe fallback if not installed directly
-}
+import prismarineNbt from 'prismarine-nbt'
+
+const { comp, string: nbtString, simplify: simplifyNbt } = prismarineNbt
+
+const PRE_JOIN_ACTION = Object.freeze({
+  login: 'authme:prejoin-login/submit',
+  register: 'authme:prejoin-register/submit'
+})
 
 function logEvent(username, event, message) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line no-undef
     const { BrowserWindow } = require('electron')
     const win = BrowserWindow?.getAllWindows?.()[0]
-    if (win) {
-      win.webContents.send('botEvent', {
-        id: username,
-        event: event,
-        message: message
-      })
-    }
+    win?.webContents.send('botEvent', { id: username, event, message })
   } catch {
-    // Safe fallback in test or headless environment
+    // Electron is intentionally unavailable in unit and live-network tests.
   }
 }
 
-/**
- * Recursively extracts all string values from any nested object, array, NBT structure, or JSON string.
- */
-export function extractAllStrings(data, bucket = []) {
-  if (data === null || data === undefined) return bucket
+/** Recursively extracts string values and meaningful field names from chat/dialog/NBT payloads. */
+export function extractAllStrings(data, bucket = [], seen = new Set()) {
+  if (data === null || data === undefined || seen.has(data)) return bucket
   if (typeof data === 'string') {
     bucket.push(data)
     try {
       const parsed = JSON.parse(data)
-      if (typeof parsed === 'object' && parsed !== null) {
-        extractAllStrings(parsed, bucket)
-      }
+      if (parsed && typeof parsed === 'object') extractAllStrings(parsed, bucket, seen)
     } catch {
-      // not JSON
+      // Plain text.
     }
     return bucket
   }
+  if (typeof data !== 'object') return bucket
+  seen.add(data)
   if (Array.isArray(data)) {
-    for (const item of data) {
-      extractAllStrings(item, bucket)
-    }
+    for (const item of data) extractAllStrings(item, bucket, seen)
     return bucket
   }
-  if (typeof data === 'object') {
-    // If it is an NBT compound/list tag with type and value
-    if (data.type !== undefined && data.value !== undefined) {
-      extractAllStrings(data.value, bucket)
-      return bucket
-    }
-    for (const key of Object.keys(data)) {
-      // Keep key names like 'confirm', 'password', 'action_key' if relevant
-      extractAllStrings(data[key], bucket)
-    }
+  for (const [key, value] of Object.entries(data)) {
+    if (/^(?:id|key|name|action|command|template|input|field)/i.test(key)) bucket.push(key)
+    extractAllStrings(value, bucket, seen)
   }
   return bucket
 }
 
-/**
- * Parses raw chat/title/dialog text from Minecraft packet payloads.
- * Handles strings, JSON objects, component arrays, and prismarine-nbt compounds.
- */
+/** Handles JSON components, registry holders and both raw and simplified prismarine-NBT. */
 export function extractText(data) {
-  if (!data) return ''
+  if (data === null || data === undefined) return ''
   if (typeof data === 'string') {
     try {
-      const parsed = JSON.parse(data)
-      return extractText(parsed)
+      return extractText(JSON.parse(data))
     } catch {
       return data
     }
   }
-  if (nbtSimplify && typeof data === 'object' && data.type && data.value !== undefined) {
+  if (typeof data === 'object' && data.type && data.value !== undefined) {
     try {
-      const simplified = nbtSimplify(data)
-      return extractText(simplified)
+      return extractText(simplifyNbt(data))
     } catch {
-      // fallback
+      // Some registry-holder payloads look like NBT but are already decoded.
     }
   }
-  const strings = extractAllStrings(data)
-  return strings.join(' ').replace(/\s+/g, ' ').trim()
+  return extractAllStrings(data).join(' ').replace(/\s+/g, ' ').trim()
 }
 
-/**
- * Checks if a text indicates a registration prompt.
- */
+function normalizeText(text) {
+  return String(text || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ı/g, 'i')
+    .replace(/ş/g, 's')
+    .replace(/ğ/g, 'g')
+    .replace(/ç/g, 'c')
+    .replace(/ö/g, 'o')
+    .replace(/ü/g, 'u')
+    .toLowerCase()
+}
+
 export function isRegisterPrompt(text) {
-  if (!text || typeof text !== 'string') return false
-  const lower = text.toLowerCase()
-  const registerKeywords = [
-    '/register',
-    '/reg ',
-    'register',
-    'registration',
-    'kayıt',
-    'kayit',
-    'kaydol',
-    'kayit ol',
-    'kayıt ol',
-    'şifrenizi belirleyin',
-    'sifrenizi belirleyin',
-    'şifre tekrar',
-    'sifre tekrar',
-    'tekrarşifre',
-    'tekrarsifre',
-    'confirmpassword',
-    'confirm_password',
-    'confirm_email',
-    'confirm',
-    'pre_join_register',
-    'create an account',
-    'parola belirle',
-    'create a password',
-    'set your password',
-    'choose a password',
-    'registrieren',
-    'registrarse',
-    'регистрация',
-    'зарегистрироваться'
-  ]
-  return registerKeywords.some((keyword) => lower.includes(keyword))
+  const value = normalizeText(text)
+  return [
+    /\/(?:register|reg)\b/,
+    /\b(?:register|registration|registrieren|registrarse)\b/,
+    /\b(?:kayit|kaydol)\b/,
+    /\b(?:create|set|choose) (?:an account|a password)\b/,
+    /\b(?:confirm_password|confirmpassword|repeat password)\b/,
+    /authme:prejoin-register\/submit/
+  ].some((pattern) => pattern.test(value))
 }
 
-/**
- * Checks if a text indicates a login prompt.
- */
 export function isLoginPrompt(text) {
-  if (!text || typeof text !== 'string') return false
-  const lower = text.toLowerCase()
-  const loginKeywords = [
-    '/login',
-    '/l ',
-    'login',
-    'giriş',
-    'giris',
-    'giriş yap',
-    'giris yap',
-    'pre_join_login',
-    'şifrenizi girin',
-    'sifrenizi girin',
-    'parolanızı girin',
-    'enter your password',
-    'enter password',
-    'anmelden',
-    'iniciar sesión',
-    'вход',
-    'авторизоваться'
-  ]
-  return loginKeywords.some((keyword) => lower.includes(keyword))
+  const value = normalizeText(text)
+  return [
+    /\/(?:login|log|l)\b/,
+    /\b(?:login|log in|anmelden)\b/,
+    /\b(?:giris|oturum ac)\b/,
+    /\benter (?:your )?(?:password|pin)\b/,
+    /authme:prejoin-login\/submit/
+  ].some((pattern) => pattern.test(value))
 }
 
-/**
- * Checks if a text indicates that authentication was successful.
- */
 export function isAuthSuccess(text) {
-  if (!text || typeof text !== 'string') return false
-  const lower = text.toLowerCase()
-  const successPatterns = [
-    /successful(?:ly)?\s+log(?:ged)?\s*in/i,
-    /log(?:ged)?\s*in\s+successfully/i,
-    /ba[sş]ar[ıi]yla\s+.*giri[sş]\s+yapt[ıi]n[ıi]z/i,
-    /ba[sş]ar[ıi]yla\s+.*kay[ıi]t/i,
-    /giri[sş]\s+ba[sş]ar[ıi]l[ıi]/i,
-    /giri[sş]\s+yap[ıi]ld[ıi]/i,
-    /kay[ıi]t\s+ba[sş]ar[ıi]l[ıi]/i,
-    /kayd[ıi]n[ıi]z\s+tamamland[ıi]/i,
-    /registration\s+completed/i,
-    /successful(?:ly)?\s+register(?:ed)?/i,
-    /ho[sş]\s*geldin(?:iz)?/i,
-    /welcome\s+back/i
-  ]
-  return successPatterns.some((pattern) => pattern.test(lower))
+  const value = normalizeText(text)
+  return [
+    /successful(?:ly)? (?:log(?:ged)? in|register(?:ed)?)/,
+    /(?:login|log in|registration) (?:was )?(?:successful|completed)/,
+    /(?:giris|kayit) basarili/,
+    /basariyla .*?(?:giris|kayit)/,
+    /(?:logged-in|authenticated) due to session/,
+    /you are (?:now )?(?:logged in|authenticated)/,
+    /already logged in/,
+    /\bwelcome back\b/,
+    /\bhos ?geldiniz\b/
+  ].some((pattern) => pattern.test(value))
 }
 
-/**
- * Classifies an AuthMe authentication prompt based on bytecode/protocol analysis:
- * - Pre-join action keys (pre_join_register_submit vs pre_join_login_submit)
- * - Input fields (confirm, confirm_password, email)
- * - Template commands (register $(...) vs login $(...))
- * - Multilingual keyword matches & server feedback loops
- */
 export function classifyAuthPrompt(dataOrText, isNewUser = true) {
   const text = typeof dataOrText === 'string' ? dataOrText : extractText(dataOrText)
-  if (!text) {
-    return isNewUser ? 'register' : 'login'
-  }
-  const lower = text.toLowerCase()
+  const value = normalizeText(text)
+  if (!value) return isNewUser ? 'register' : 'login'
+  if (isAuthSuccess(value)) return 'success'
 
-  // 1. Success check
-  if (isAuthSuccess(lower)) {
-    return 'success'
-  }
-
-  // 2. Server feedback transition:
-  // "This user isn't registered!" / "Bu oyuncu kayitli degil!" -> Immediate switch to register
-  if (
-    lower.includes("isn't registered") ||
-    lower.includes('is not registered') ||
-    lower.includes('not registered') ||
-    lower.includes('kayitli degil') ||
-    lower.includes('kayıtlı değil') ||
-    lower.includes('unregistered')
-  ) {
+  if (/authme:prejoin-register\/submit/.test(value)) return 'register'
+  if (/authme:prejoin-login\/submit/.test(value)) return 'login'
+  if (/\b(?:is not|isn't|not) registered\b|\bunregistered\b|kayitli degil/.test(value)) {
     return 'register'
   }
-
-  // "You already have registered this username!" / "Zaten kayitlisin" -> Immediate switch to login
-  if (
-    lower.includes('already have registered') ||
-    lower.includes('already registered') ||
-    lower.includes('zaten kayit') ||
-    lower.includes('zaten kayıt') ||
-    lower.includes('name_taken')
-  ) {
+  if (/already (?:have )?registered|already registered|zaten kayit|name_taken/.test(value)) {
     return 'login'
   }
 
-  // "You're already logged in!" / "Zaten giris yaptin!"
-  if (
-    lower.includes('already logged in') ||
-    lower.includes('zaten giris') ||
-    lower.includes('zaten giriş')
-  ) {
-    return 'success'
-  }
-
-  // 3. Confirm indicator -> exclusively registration (AuthMe PaperDialog and command syntax)
-  if (
-    lower.includes('confirm') ||
-    lower.includes('tekrar') ||
-    lower.includes('pre_join_register')
-  ) {
-    return 'register'
-  }
-
-  // 4. Pre-join login action key
-  if (lower.includes('pre_join_login')) {
-    return 'login'
-  }
-
-  // 5. Keyword analysis
-  const hasRegister = isRegisterPrompt(lower)
-  const hasLogin = isLoginPrompt(lower)
-
-  if (hasRegister && !hasLogin) {
-    return 'register'
-  }
-  if (hasLogin && !hasRegister) {
-    return 'login'
-  }
-  if (hasRegister && hasLogin) {
-    // Both present (e.g. server banner showing "/register <pass> or /login <pass>"):
-    // If bot has not registered on this server, register!
-    return isNewUser ? 'register' : 'login'
-  }
-
+  const hasRegister = isRegisterPrompt(value)
+  const hasLogin = isLoginPrompt(value)
+  if (hasRegister !== hasLogin) return hasRegister ? 'register' : 'login'
+  if (/\bconfirm\b|\brepeat\b/.test(value)) return 'register'
   return isNewUser ? 'register' : 'login'
 }
 
+function findPreJoinAction(dialogData, classification) {
+  const values = extractAllStrings(dialogData)
+  const exact = values.find((value) => {
+    const action = String(value)
+    return (
+      /^authme:prejoin-(?:login|register)\/submit$/i.test(action) ||
+      /^nlogin:(?:login|register)\/(?:yes|submit)$/i.test(action)
+    )
+  })
+  if (exact) return String(exact).toLowerCase()
+  const legacy = values.some((value) =>
+    new RegExp(`authme:pre[_-]?join[_-]?${classification}[_/-]?submit`, 'i').test(String(value))
+  )
+  return legacy ? PRE_JOIN_ACTION[classification] : null
+}
+
+function hasDialogInput(dialogData, inputName) {
+  const expected = normalizeText(inputName)
+  return extractAllStrings(dialogData).some((value) => normalizeText(value) === expected)
+}
+
+function findDialogInput(dialogData, candidates) {
+  const expected = new Set(candidates.map(normalizeText))
+  return extractAllStrings(dialogData).find((value) => expected.has(normalizeText(value))) || null
+}
+
+/** Creates the response payload consumed by Paper's DialogResponseView. */
+export function createDialogResponse(dialogData, classification, password, email = '') {
+  const fields = createDialogFields(dialogData, classification, password, email)
+  return comp(
+    Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, nbtString(value)]))
+  )
+}
+
+function createDialogFields(dialogData, classification, password, email = '') {
+  const fields = {}
+  if (classification === 'login') {
+    fields.password = password
+  } else if (classification === 'register') {
+    if (hasDialogInput(dialogData, 'email') && !hasDialogInput(dialogData, 'password')) {
+      fields.email = email || password
+    } else {
+      fields.password = password
+    }
+    const confirmationField = findDialogInput(dialogData, [
+      'confirm',
+      'confirmation',
+      'confirm_password',
+      'password_confirm',
+      'password_confirmation'
+    ])
+    if (confirmationField) {
+      fields[confirmationField] = fields.email || password
+    }
+    if (hasDialogInput(dialogData, 'email') && fields.password) {
+      fields.email = email
+    }
+  }
+  return fields
+}
+
+function encodeVarInt(value) {
+  const bytes = []
+  let remaining = value >>> 0
+  do {
+    let byte = remaining & 0x7f
+    remaining >>>= 7
+    if (remaining !== 0) byte |= 0x80
+    bytes.push(byte)
+  } while (remaining !== 0)
+  return Buffer.from(bytes)
+}
+
+function encodeProtocolString(value) {
+  const bytes = Buffer.from(String(value), 'utf8')
+  return Buffer.concat([encodeVarInt(bytes.length), bytes])
+}
+
 /**
- * Mineflayer Auto-Auth Plugin for AuthMe Reloaded
- * Works with chat, titles, actionbars, and 1.21.6+ / 1.21.11+ / 26.x packet_show_dialog pre-login dialogs.
+ * Encodes the length-prefixed anonymous NBT used by custom_click_action.
+ * minecraft-protocol <=1.68 encodes this field as a Boolean option, although
+ * the wire format introduced in 1.21.6 is a VarInt byte length. Keep this
+ * narrow workaround here until the upstream serializer is corrected.
+ */
+export function createCustomClickActionPacket(actionId, fields, packetId = 0x08) {
+  const tags = []
+  for (const [key, value] of Object.entries(fields)) {
+    const keyBytes = Buffer.from(key, 'utf8')
+    const valueBytes = Buffer.from(String(value), 'utf8')
+    if (keyBytes.length > 0xffff || valueBytes.length > 0xffff) {
+      throw new RangeError('Dialog field exceeds the Minecraft NBT string limit')
+    }
+    const tag = Buffer.allocUnsafe(1 + 2 + keyBytes.length + 2 + valueBytes.length)
+    let offset = 0
+    tag.writeUInt8(0x08, offset++)
+    tag.writeUInt16BE(keyBytes.length, offset)
+    offset += 2
+    keyBytes.copy(tag, offset)
+    offset += keyBytes.length
+    tag.writeUInt16BE(valueBytes.length, offset)
+    offset += 2
+    valueBytes.copy(tag, offset)
+    tags.push(tag)
+  }
+  const nbt = Buffer.concat([Buffer.from([0x0a]), ...tags, Buffer.from([0x00])])
+  if (nbt.length > 0x8000) throw new RangeError('Dialog response exceeds the 32 KiB limit')
+  return Buffer.concat([
+    encodeVarInt(packetId),
+    encodeProtocolString(actionId),
+    encodeVarInt(nbt.length),
+    nbt
+  ])
+}
+
+function getRegisterCommand(text, password, email = '') {
+  const value = String(text || '')
+  const commandMatch = value.match(/\/(register|reg)\b/i)
+  const command = commandMatch ? `/${commandMatch[1].toLowerCase()}` : '/register'
+  const normalized = normalizeText(value)
+  const argumentPlaceholders = (normalized.match(/<[^>]+>/g) || []).filter(
+    (placeholder) => !/email|mail/.test(placeholder)
+  ).length
+  const passwordPlaceholders = (
+    normalized.match(
+      /<[^>]*(?:password|pass|sifre|parola|senha|contrasena|passwort|heslo|haslo)[^>]*>/g
+    ) || []
+  ).length
+  const needsConfirmation =
+    passwordPlaceholders > 1 || /\bconfirm\b|\brepeat\b|tekrar/.test(normalized)
+  const needsEmail = /<[^>]*email[^>]*>/.test(normalized)
+  if (needsEmail && email) return `${command} ${password} ${email}`
+  const hasExplicitSyntax = !!commandMatch || passwordPlaceholders > 0
+  const useConfirmation = needsConfirmation || !hasExplicitSyntax || argumentPlaceholders > 1
+  return useConfirmation ? `${command} ${password} ${password}` : `${command} ${password}`
+}
+
+function getLoginCommand(text, password) {
+  const commandMatch = String(text || '').match(/\/(login|log|l)\b/i)
+  return `/${commandMatch ? commandMatch[1].toLowerCase() : 'login'} ${password}`
+}
+
+/**
+ * Universal offline-server authentication automation.
+ * AuthMe 6 pre-join forms are submitted in CONFIGURATION with custom_click_action;
+ * ordinary AuthMe, nLogin, OpeNLogin, LoginSecurity and LimboAuth prompts are sent in PLAY.
  */
 export function autoAuth(bot, options = {}) {
   const enabled = options.enabled ?? false
   const password = options.password || 'trafficermc123a'
-  const actionDelay = options.delay || 600
+  const email = options.email || ''
+  const actionDelay = Math.max(0, Number(options.delay ?? 600))
+  const maxAttempts = Math.max(1, Number(options.maxAttempts ?? 5))
+  const username = bot._client?.username || bot.username || 'Bot'
+  const timers = new Set()
 
   bot.autoAuth = {
     enabled,
@@ -281,171 +301,172 @@ export function autoAuth(bot, options = {}) {
     lastActionTime: 0,
     registerCount: 0,
     loginCount: 0,
-    maxAttempts: 5
+    maxAttempts,
+    phase: 'idle'
   }
-
   if (!enabled) return
 
-  const username = bot._client?.username || bot.username || 'Bot'
+  const client = bot._client
 
-  let isSpawned = false
-  bot.once('spawn', () => {
-    isSpawned = true
-  })
+  const schedule = (fn, delayMs) => {
+    const timer = setTimeout(() => {
+      timers.delete(timer)
+      fn()
+    }, delayMs)
+    timers.add(timer)
+  }
 
-  const safeChat = (cmd) => {
-    try {
-      if (!isSpawned && !bot.entity) {
-        bot.once('spawn', () => {
-          setTimeout(() => safeChat(cmd), 200)
-        })
-        return
+  const sendWhenPlay = (command) => {
+    const send = () => {
+      const isPlayReady = client?.state === 'play' || (!client?.state && !!bot.entity)
+      if (!isPlayReady || client?.ended) return false
+      try {
+        if (typeof bot.chat === 'function') bot.chat(command)
+        else if (typeof client.chat === 'function') client.chat(command)
+        else if (typeof client._signedChat === 'function') client._signedChat(command)
+        else return false
+        return true
+      } catch (error) {
+        logEvent(username, 'chat', `[Auto-Auth] Command could not be sent: ${error.message}`)
+        return false
       }
-      if (typeof bot.chat === 'function') {
-        bot.chat(cmd)
-      } else if (bot._client && typeof bot._client.write === 'function') {
-        try {
-          bot._client.write('chat_command', { command: cmd.startsWith('/') ? cmd.slice(1) : cmd })
-        } catch {
-          bot._client.write('chat_message', { message: cmd })
+    }
+
+    schedule(() => {
+      if (send()) return
+      const onState = (state) => {
+        if (state === 'play') {
+          client.off?.('state', onState)
+          schedule(send, 50)
         }
       }
-    } catch (err) {
-      console.error(`[Auto-Auth] Error sending command ${cmd}:`, err.message)
-    }
-  }
-
-  const executeRegister = (force = false) => {
-    if (bot.autoAuth.authenticated) return
-    if (bot.autoAuth.registerCount >= bot.autoAuth.maxAttempts) return
-
-    const now = Date.now()
-    if (
-      !force &&
-      now - bot.autoAuth.lastActionTime < 1500 &&
-      bot.autoAuth.lastAction === 'register'
-    ) {
-      return
-    }
-
-    bot.autoAuth.lastAction = 'register'
-    bot.autoAuth.lastActionTime = now
-    bot.autoAuth.registerCount++
-
-    setTimeout(() => {
-      if (bot.autoAuth.authenticated) return
-      const cmd = `/register ${bot.autoAuth.password} ${bot.autoAuth.password}`
-      safeChat(cmd)
-      logEvent(username, 'chat', `[Auto-Auth] Registering with password: ${bot.autoAuth.password}`)
+      client?.on?.('state', onState)
+      schedule(() => client?.off?.('state', onState), 10000)
     }, actionDelay)
   }
 
-  const executeLogin = (force = false) => {
-    if (bot.autoAuth.authenticated) return
-    if (bot.autoAuth.loginCount >= bot.autoAuth.maxAttempts) return
-
+  const execute = (classification, rawText, force = false) => {
+    const state = bot.autoAuth
+    const countKey = classification === 'register' ? 'registerCount' : 'loginCount'
+    if (state[countKey] >= state.maxAttempts) return
     const now = Date.now()
-    if (!force && now - bot.autoAuth.lastActionTime < 1500 && bot.autoAuth.lastAction === 'login') {
-      return
-    }
+    if (!force && state.lastAction === classification && now - state.lastActionTime < 1500) return
 
-    bot.autoAuth.lastAction = 'login'
-    bot.autoAuth.lastActionTime = now
-    bot.autoAuth.loginCount++
+    state.authenticated = false
+    state.lastAction = classification
+    state.lastActionTime = now
+    state[countKey]++
+    state.phase = 'command-pending'
+    const command =
+      classification === 'register'
+        ? getRegisterCommand(rawText, state.password, email)
+        : getLoginCommand(rawText, state.password)
+    sendWhenPlay(command)
+    logEvent(
+      username,
+      'chat',
+      `[Auto-Auth] ${classification === 'register' ? 'Registration' : 'Login'} submitted.`
+    )
+  }
 
-    setTimeout(() => {
-      if (bot.autoAuth.authenticated) return
-      const cmd = `/login ${bot.autoAuth.password}`
-      safeChat(cmd)
-      logEvent(username, 'chat', `[Auto-Auth] Logging in with password: ${bot.autoAuth.password}`)
-    }, actionDelay)
+  const markSuccess = () => {
+    const state = bot.autoAuth
+    if (state.authenticated) return
+    if (state.lastAction === 'register') state.hasRegistered = true
+    state.authenticated = true
+    state.phase = 'authenticated'
+    bot.emit('authSuccess')
+    logEvent(username, 'chat', '[Auto-Auth] Authentication successful.')
   }
 
   const handleIncomingText = (rawText) => {
-    if (!rawText || bot.autoAuth.authenticated) return
+    if (!rawText) return
     const text = extractText(rawText)
     if (!text) return
+    const classification = classifyAuthPrompt(rawText, !bot.autoAuth.hasRegistered)
+    if (classification === 'success') return markSuccess()
+    if (bot.autoAuth.authenticated) return
+    if (
+      !isRegisterPrompt(text) &&
+      !isLoginPrompt(text) &&
+      !/(?:is not|isn't|not) registered|unregistered|already (?:have )?registered/i.test(text)
+    ) {
+      return
+    }
+    execute(classification, text, bot.autoAuth.lastAction !== classification)
+  }
 
-    const isNewUser = !bot.autoAuth.hasRegistered && bot.autoAuth.registerCount === 0
-    const classification = classifyAuthPrompt(rawText, isNewUser)
+  const handleDialogPacket = (packet) => {
+    const dialogData = packet?.dialog ?? packet
+    if (!dialogData) return
+    const text = extractText(dialogData)
+    let classification = classifyAuthPrompt(dialogData, !bot.autoAuth.hasRegistered)
+    const actionId = findPreJoinAction(dialogData, classification)
+    if (/(?:prejoin-)?login\//.test(actionId || '')) classification = 'login'
+    if (/(?:prejoin-)?register\//.test(actionId || '')) classification = 'register'
+    const isSupportedPreJoin =
+      /^authme:prejoin-(?:login|register)\/submit$/.test(actionId || '') ||
+      /^nlogin:(?:login|register)\/(?:yes|submit)$/.test(actionId || '')
 
-    if (classification === 'success') {
-      bot.autoAuth.authenticated = true
-      bot.emit('authSuccess')
-      logEvent(username, 'chat', '[Auto-Auth] Authentication successful!')
+    if (
+      isSupportedPreJoin &&
+      (typeof client?.writeRaw === 'function' || typeof client?.write === 'function')
+    ) {
+      const countKey = classification === 'register' ? 'registerCount' : 'loginCount'
+      if (bot.autoAuth[countKey] >= bot.autoAuth.maxAttempts) return
+      try {
+        const fields = createDialogFields(dialogData, classification, password, email)
+        if (typeof client.writeRaw === 'function' && client.state === 'configuration') {
+          client.writeRaw(createCustomClickActionPacket(actionId, fields))
+        } else {
+          client.write('custom_click_action', {
+            id: actionId,
+            nbt: createDialogResponse(dialogData, classification, password, email)
+          })
+        }
+        bot.autoAuth.authenticated = false
+        bot.autoAuth.lastAction = classification
+        bot.autoAuth.lastActionTime = Date.now()
+        bot.autoAuth[countKey]++
+        bot.autoAuth.phase = 'prejoin-submitted'
+        logEvent(username, 'chat', `[Auto-Auth] Pre-join ${classification} form submitted.`)
+      } catch (error) {
+        logEvent(username, 'chat', `[Auto-Auth] Pre-join form failed: ${error.message}`)
+      }
       return
     }
 
-    if (classification === 'register') {
-      executeRegister(bot.autoAuth.lastAction === 'login')
-    } else if (classification === 'login') {
-      executeLogin(bot.autoAuth.lastAction === 'register')
-    }
+    execute(classification, text, bot.autoAuth.lastAction !== classification)
   }
 
-  // 1. Messagestr listener (Standard Mineflayer Chat)
-  bot.on('messagestr', (message) => {
-    handleIncomingText(message)
-  })
+  bot.on('messagestr', handleIncomingText)
+  bot.on('actionBar', handleIncomingText)
+  bot.on('title', handleIncomingText)
 
-  // 2. Underlying Client Packet Listeners (Raw Chat, Titles, Dialogs)
-  const client = bot._client
   if (client) {
-    client.on('system_chat', (data) => {
-      const content = data?.content || data?.message || data
-      handleIncomingText(content)
-    })
-
-    client.on('player_chat', (data) => {
-      const content = data?.plainMessage || data?.unsignedContent || data?.formattedText
-      handleIncomingText(content)
-    })
-
-    client.on('chat', (data) => {
-      const content = data?.message || data
-      handleIncomingText(content)
-    })
-
-    client.on('set_title_text', (data) => {
-      handleIncomingText(data?.text || data)
-    })
-
-    client.on('set_subtitle_text', (data) => {
-      handleIncomingText(data?.text || data)
-    })
-
-    client.on('set_action_bar_text', (data) => {
-      handleIncomingText(data?.text || data)
-    })
-
-    client.on('title', (data) => {
-      handleIncomingText(data?.text || data)
-    })
-
-    // 3. Modern AuthMe Reloaded Dialog Packets (1.21.6+, 1.21.11+, 26.x)
-    const handleDialogPacket = (packet) => {
-      if (!packet || bot.autoAuth.authenticated) return
-      const dialogData = packet.dialog || packet
-      const text = extractText(dialogData)
-      logEvent(username, 'chat', `[Auto-Auth] Dialog received: ${text.slice(0, 60)}...`)
-
-      const isNewUser = !bot.autoAuth.hasRegistered && bot.autoAuth.registerCount === 0
-      const classification = classifyAuthPrompt(dialogData, isNewUser)
-
-      if (classification === 'success') {
-        bot.autoAuth.authenticated = true
-        bot.emit('authSuccess')
-        return
-      }
-
-      if (classification === 'register') {
-        executeRegister(bot.autoAuth.lastAction === 'login')
-      } else if (classification === 'login') {
-        executeLogin(bot.autoAuth.lastAction === 'register')
-      }
+    // minecraft-protocol packet names are snake_case. Keep aliases for test/proxy adapters.
+    for (const event of [
+      'system_chat',
+      'player_chat',
+      'chat',
+      'set_title_text',
+      'set_subtitle_text',
+      'set_action_bar_text'
+    ]) {
+      client.on(event, handleIncomingText)
     }
-
-    client.on('packet_show_dialog', handleDialogPacket)
     client.on('show_dialog', handleDialogPacket)
+    client.on('packet_show_dialog', handleDialogPacket)
+    client.on('respawn', () => {
+      bot.autoAuth.authenticated = false
+      bot.autoAuth.phase = 'server-switch'
+      bot.autoAuth.lastAction = null
+      bot.autoAuth.lastActionTime = 0
+    })
   }
+
+  bot.once('end', () => {
+    for (const timer of timers) clearTimeout(timer)
+    timers.clear()
+  })
 }

@@ -24,16 +24,15 @@ const Store = require('electron-store')
 const mineflayer = require('mineflayer')
 import { antiafk } from './js/misc/antiafk'
 import { autoAuth } from './js/misc/autoAuth'
-import { resolveBotVersion } from './js/misc/versionResolver'
+import { resolveBotVersion, isVersionSupported } from './js/misc/versionResolver'
+import { sendBotMessage, getNextMessage } from './js/misc/spammerEngine'
 import {
-  sendBotMessage,
-  getNextMessage,
-  applyCustomFormatter,
-  generateRandomTag
-} from './js/misc/spammerEngine'
+  DEFAULT_REJOIN_DELAY_MIN,
+  DEFAULT_REJOIN_DELAY_MAX,
+  getRandomRejoinDelay,
+  normalizeRejoinRange
+} from './js/misc/reconnectPolicy'
 import { consoleManager } from './js/misc/consoleStreamer'
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-
 const botApi = new EventEmitter()
 botApi.setMaxListeners(0)
 const store = new Store()
@@ -55,9 +54,15 @@ let stopScript = false
 let stopProxyTest = false
 let currentProxy = 0
 let proxyUsed = 0
+const rejoinTimers = new Set()
 
 function storeinfo() {
   return cachedConfig
+}
+
+function clearRejoinTimers() {
+  for (const timer of rejoinTimers) clearTimeout(timer)
+  rejoinTimers.clear()
 }
 
 let clientVersion = 3.6
@@ -94,8 +99,45 @@ function getAllUniqueBots() {
   return bots
 }
 
-let lastChatBroadcast = ''
-let lastChatBroadcastTime = 0
+function isBotSelected(username) {
+  if (!username) return false
+  if (playerListSet.has(username)) return true
+  const lower = String(username).toLowerCase().trim()
+  for (const name of playerListSet) {
+    if (String(name).toLowerCase().trim() === lower) return true
+  }
+  return false
+}
+
+function resolveTargetBots(explicitTargets = null) {
+  const targets = []
+  const seen = new Set()
+
+  let rawTargets = null
+  if (explicitTargets) {
+    rawTargets = Array.isArray(explicitTargets) ? explicitTargets : [explicitTargets]
+  } else if (playerList && playerList.length > 0) {
+    rawTargets = playerList
+  } else {
+    // If no explicit selection in playerList, target all active unique bots
+    return getAllUniqueBots()
+  }
+
+  for (const u of rawTargets) {
+    const b = getBot(u)
+    if (b && !seen.has(b)) {
+      seen.add(b)
+      targets.push(b)
+    }
+  }
+
+  // Fallback to all unique bots if selected names could not be resolved
+  if (targets.length === 0) {
+    return getAllUniqueBots()
+  }
+
+  return targets
+}
 
 let spammerActive = false
 let spammerTimeout = null
@@ -135,7 +177,7 @@ function createMainWindow() {
   })
 
   ipcMain.on('playerList', (event, list) => {
-    playerList = Array.isArray(list) ? list : []
+    playerList = Array.isArray(list) ? list.map((n) => String(n).trim()).filter(Boolean) : []
     playerListSet = new Set(playerList)
   })
 
@@ -260,6 +302,30 @@ function migrateConfig() {
       config.value.spammerMps = 1
       updated = true
     }
+    const legacyReconnectDelay = Number(config.value.reconnectDelay)
+    if (config.value.reconnectDelayMin === undefined) {
+      config.value.reconnectDelayMin =
+        Number.isFinite(legacyReconnectDelay) && legacyReconnectDelay >= 3000
+          ? Math.round(legacyReconnectDelay)
+          : DEFAULT_REJOIN_DELAY_MIN
+      updated = true
+    }
+    if (config.value.reconnectDelayMax === undefined) {
+      config.value.reconnectDelayMax =
+        Number.isFinite(legacyReconnectDelay) && legacyReconnectDelay >= 3000
+          ? Math.max(config.value.reconnectDelayMin, Math.round(legacyReconnectDelay * 1.5))
+          : DEFAULT_REJOIN_DELAY_MAX
+      updated = true
+    }
+    const normalizedRejoin = normalizeRejoinRange(config.value)
+    if (
+      config.value.reconnectDelayMin !== normalizedRejoin.min ||
+      config.value.reconnectDelayMax !== normalizedRejoin.max
+    ) {
+      config.value.reconnectDelayMin = normalizedRejoin.min
+      config.value.reconnectDelayMax = normalizedRejoin.max
+      updated = true
+    }
     if (updated) {
       store.set('config', config)
     }
@@ -301,23 +367,7 @@ function startSpammerLoop() {
     const mps = parseInt(config.value?.spammerMps, 10) || 1
 
     // Resolve target bots cleanly
-    let targetBots = []
-    const seenBots = new Set()
-    const targetUsernames =
-      playerList && playerList.length > 0 ? playerList : Array.from(activeBots.keys())
-
-    for (const u of targetUsernames) {
-      const b = getBot(u)
-      if (b && !seenBots.has(b)) {
-        seenBots.add(b)
-        targetBots.push(b)
-      }
-    }
-
-    // Fallback to all connected bots if none resolved from playerList
-    if (targetBots.length === 0) {
-      targetBots = getAllUniqueBots()
-    }
+    const targetBots = resolveTargetBots()
 
     if (targetBots.length > 0) {
       for (let burst = 0; burst < mps; burst++) {
@@ -336,13 +386,19 @@ function startSpammerLoop() {
               counter: spammerCounter,
               onSent: (formattedMsg) => {
                 sendEvent(bUname, 'chat', formattedMsg)
+              },
+              onFailed: (_formattedMsg, _failedBot, reason) => {
+                sendEvent(bUname, 'chat', `[Spammer send failed] ${reason}`)
               }
             })
-            // Stagger sends across bots by 60ms so server anti-spam won't drop simultaneous packets
+            // Stagger sends across bots by 75ms so server anti-spam won't drop simultaneous packets
             if (targetBots.length > 1 && bIdx < targetBots.length - 1) {
-              await delay(60)
+              await delay(75)
             }
           }
+        }
+        if (mps > 1 && burst < mps - 1) {
+          await delay(100)
         }
       }
     }
@@ -404,13 +460,14 @@ ipcMain.on('checkboxClick', (event, id, state) => {
   }
 })
 
-ipcMain.on('btnClick', (event, btn) => {
+ipcMain.on('btnClick', async (event, btn) => {
   switch (btn) {
     case 'btnStart':
       connectBot()
       break
     case 'btnStop':
       stopBot = true
+      clearRejoinTimers()
       notify('Info', 'Stopped sending bots.', 'success')
       break
     case 'btnChat':
@@ -430,9 +487,12 @@ ipcMain.on('btnClick', (event, btn) => {
       notify('Spammer', 'Spammer stopped', 'success')
       break
     case 'btnDisconnect':
+      stopBot = true
+      clearRejoinTimers()
       exeAll('disconnect')
       consoleManager.reset()
       sendEvent('System', 'console_lead', { leadBot: null, isFirst: false })
+      sendEvent('System', 'clearBots', '')
       break
     case 'btnSetHotbar':
       exeAll('sethotbar ' + storeinfo().value.hotbarSlot)
@@ -472,20 +532,22 @@ ipcMain.on('btnClick', (event, btn) => {
       break
     case 'btnAfkOff':
       exeAll('afkoff')
+      break
     case 'runScript': {
-      let scriptTargets =
-        playerList && playerList.length > 0 ? playerList : Array.from(activeBots.keys())
-      if (scriptTargets.length === 0) {
-        scriptTargets = getAllUniqueBots().map((b) => b._client?.username || b.username || 'Bot')
-      }
-      if (scriptTargets.length === 0) {
+      const targetBots = resolveTargetBots()
+      if (targetBots.length === 0) {
         notify('Warning', 'No active bots connected to run script', 'error')
         break
       }
-      notify('Script', `Running script on ${scriptTargets.length} bot(s)...`, 'success')
-      scriptTargets.forEach((username) => {
-        startScript(username)
-      })
+      notify('Script', `Running script on ${targetBots.length} bot(s)...`, 'success')
+      for (let i = 0; i < targetBots.length; i++) {
+        const b = targetBots[i]
+        const uname = b._client?.username || b.username || 'Bot'
+        startScript(uname)
+        if (targetBots.length > 1 && i < targetBots.length - 1) {
+          await delay(60)
+        }
+      }
       break
     }
     case 'stopScript':
@@ -614,6 +676,7 @@ async function startScript(username) {
     // Direct slash command support: e.g. "/login 123456" or "/spawn"
     if (rawLine.startsWith('/')) {
       dispatchBotCommand(username, 'command', [rawLine])
+      await delay(120)
       continue
     }
 
@@ -630,6 +693,7 @@ async function startScript(username) {
       case 'cmd': {
         const fullCmd = args.join(' ')
         dispatchBotCommand(username, 'command', [fullCmd])
+        await delay(120)
         break
       }
       case 'chat':
@@ -637,6 +701,7 @@ async function startScript(username) {
       case 'msg': {
         const msg = args.join(' ')
         dispatchBotCommand(username, 'chat', [msg])
+        await delay(120)
         break
       }
       case 'hotbar':
@@ -729,35 +794,17 @@ async function startScript(username) {
 
 async function exeAll(command, explicitTargets = null) {
   if (!command) return
-  let targetUsernames =
-    explicitTargets ||
-    (playerList && playerList.length > 0 ? playerList : Array.from(activeBots.keys()))
-  if (!targetUsernames || targetUsernames.length === 0)
+  const targetBots = resolveTargetBots(explicitTargets)
+  if (!targetBots || targetBots.length === 0) {
     return notify('Warning', 'No active bots connected or selected', 'error')
-
-  let targetBots = []
-  const seenBots = new Set()
-  for (const u of targetUsernames) {
-    const b = getBot(u)
-    if (b && !seenBots.has(b)) {
-      seenBots.add(b)
-      targetBots.push(b)
-    }
   }
-
-  if (targetBots.length === 0) {
-    targetBots = getAllUniqueBots()
-  }
-
-  if (targetBots.length === 0)
-    return notify('Warning', 'No active bots connected or selected', 'error')
 
   const cmd = command.split(' ')
   const action = cmd[0]
   const args = cmd.slice(1)
   const isLinear = storeinfo().boolean?.isLinear
   const linearDelay = storeinfo().value?.linearDelay || 100
-  const staggerDelay = isLinear ? linearDelay : targetBots.length > 1 ? 50 : 0
+  const staggerDelay = isLinear ? linearDelay : targetBots.length > 1 ? 60 : 0
 
   for (let i = 0; i < targetBots.length; i++) {
     const bot = targetBots[i]
@@ -788,8 +835,18 @@ async function startFile() {
 
 async function connectBot() {
   stopBot = false
+  clearRejoinTimers()
   currentProxy = 0
   proxyUsed = 0
+  const configuredVersion = storeinfo().value.version
+  if (!isVersionSupported(configuredVersion)) {
+    notify(
+      'Unsupported protocol',
+      `Minecraft ${configuredVersion} is not natively supported by the installed protocol stack. Use Auto Detect only with a supported server version.`,
+      'error'
+    )
+    return
+  }
   if (activeBots.size === 0) {
     consoleManager.reset()
     sendEvent('System', 'console_lead', { leadBot: null, isFirst: false })
@@ -958,12 +1015,12 @@ function newBot(options) {
       ray_trace: false,
       scoreboard: false,
       sound: false,
-      spawn_point: false,
       tablist: false,
       team: false,
       time: false,
       title: false,
-      villager: false
+      villager: false,
+      ...(options.plugins || {})
     },
     onMsaCode: (data) => {
       sendEvent(options.username, 'authmsg', data.user_code)
@@ -1006,7 +1063,9 @@ function newBot(options) {
     }
     if (storeinfo().value?.joinMessage) {
       sendBotMessage(bot, storeinfo().value.joinMessage, {
-        onSent: (m) => sendEvent(uname, 'chat', m)
+        onSent: (m) => sendEvent(uname, 'chat', m),
+        onFailed: (_message, _failedBot, reason) =>
+          sendEvent(uname, 'chat', `[Join message failed] ${reason}`)
       })
     }
   })
@@ -1018,6 +1077,30 @@ function newBot(options) {
       startScript(bot._client?.username || bot.username || options.username)
     }
   })
+
+  // Proxy/backend transition handler. Listen to the protocol event once; Mineflayer
+  // derives its own `respawn` event from the same packet.
+  const handleServerRespawn = (packet) => {
+    const uname = bot._client?.username || bot.username || options.username
+
+    const dimName = packet?.worldName || packet?.dimension || 'sub-server'
+    const transferMsg = `[System] Server transfer (Respawn) detected. Destination: ${dimName}. Synchronizing state...`
+    const evalRes = consoleManager.evaluateMessage(transferMsg, uname)
+    if (evalRes.allowed) {
+      sendEvent(uname, 'server_chat', transferMsg)
+    }
+
+    if (consoleManager.isLeadBot(uname)) {
+      sendEvent(uname, 'console_lead', {
+        leadBot: uname,
+        serverSwitch: true
+      })
+    }
+  }
+
+  if (bot._client) {
+    bot._client.on('respawn', handleServerRespawn)
+  }
   bot.on('messagestr', (msg) => {
     const uname = bot._client?.username || bot.username || options.username
     const evalRes = consoleManager.evaluateMessage(msg, uname)
@@ -1088,17 +1171,25 @@ function newBot(options) {
       })
     }
 
-    if (storeinfo().boolean?.autoReconnect) {
-      setTimeout(() => {
-        newBot(options)
-      }, storeinfo().value?.reconnectDelay || 1000)
+    if (storeinfo().boolean?.autoReconnect && !stopBot) {
+      const rejoinDelay = getRandomRejoinDelay(storeinfo().value)
+      sendEvent(
+        uname,
+        'chat',
+        `[Reconnect] Waiting ${(rejoinDelay / 1000).toFixed(1)}s before the next attempt.`
+      )
+      const timer = setTimeout(() => {
+        rejoinTimers.delete(timer)
+        if (!stopBot && storeinfo().boolean?.autoReconnect) newBot(options)
+      }, rejoinDelay)
+      rejoinTimers.add(timer)
     }
   })
 
   bot.on('physicTick', () => {
     if (!cachedConfig.boolean?.killauraToggle) return
     const uname = bot._client?.username || options.username
-    if (!playerListSet.has(uname)) return
+    if (!isBotSelected(uname)) return
     killaura()
   })
 
@@ -1153,9 +1244,6 @@ function newBot(options) {
   const handleBotAction = (event, optionsArray = []) => {
     const arr = Array.isArray(optionsArray) ? optionsArray : [optionsArray]
     switch (event) {
-      case 'disconnect':
-        bot.quit()
-        break
       case 'chat': {
         const rawMsg = arr.join(' ')
         const isCommand = rawMsg.trim().startsWith('/')
@@ -1176,6 +1264,9 @@ function newBot(options) {
           ...spamOpts,
           onSent: (formattedMsg) => {
             sendEvent(bUname, 'chat', formattedMsg)
+          },
+          onFailed: (_formattedMsg, _failedBot, reason) => {
+            sendEvent(bUname, 'chat', `[Send failed] ${reason}`)
           }
         })
         break
@@ -1187,6 +1278,9 @@ function newBot(options) {
         sendBotMessage(bot, fullCmd, {
           onSent: (formattedMsg) => {
             sendEvent(bUname, 'chat', formattedMsg)
+          },
+          onFailed: (_formattedMsg, _failedBot, reason) => {
+            sendEvent(bUname, 'chat', `[Command failed] ${reason}`)
           }
         })
         break
@@ -1255,6 +1349,16 @@ function newBot(options) {
             bot.respawn()
           } catch (_) {}
         }
+        break
+      case 'disconnect':
+      case 'quit':
+        try {
+          if (typeof bot.quit === 'function') {
+            bot.quit()
+          } else if (bot._client && typeof bot._client.end === 'function') {
+            bot._client.end()
+          }
+        } catch (_) {}
         break
       case 'hit':
         const player = arr[0]

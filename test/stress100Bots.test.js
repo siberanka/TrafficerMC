@@ -3,16 +3,13 @@ import { spawn } from 'child_process'
 import mineflayer from 'mineflayer'
 import { autoAuth } from '../src/main/js/misc/autoAuth.js'
 import { resolveBotVersion } from '../src/main/js/misc/versionResolver.js'
-import {
-  sendBotMessage,
-  getNextMessage,
-  applyCustomFormatter
-} from '../src/main/js/misc/spammerEngine.js'
+import { sendBotMessage, getNextMessage } from '../src/main/js/misc/spammerEngine.js'
 
-const JAVA_PATH = 'D:\\tools\\temurin-25-dist\\jdk-25.0.3+9\\bin\\java.exe'
-const SERVER_DIR = 'd:\\TrafficerMC\\test-server'
-const PORT = 25577
-const TOTAL_BOTS = 100
+const JAVA_PATH = process.env.TRAFFICER_TEST_JAVA || 'F:\\vds\\Java\\jdk-25.0.2+10\\bin\\java.exe'
+const SERVER_DIR =
+  process.env.TRAFFICER_TEST_SERVER_DIR || 'D:\\TrafficerMC\\test\\runtime\\direct-paper'
+const PORT = Number(process.env.TRAFFICER_TEST_PORT || 25577)
+const TOTAL_BOTS = Number(process.env.TRAFFICER_STRESS_BOTS || 100)
 const PASSWORD = 'stressTest123!'
 
 console.log(`\n======================================================`)
@@ -34,12 +31,12 @@ serverProcess.stdout.on('data', (data) => {
   }
 })
 
-serverProcess.stderr.on('data', (data) => {
+serverProcess.stderr.on('data', (_data) => {
   // console.error('[Server Err]', data.toString().trim())
 })
 
 async function runStressTest() {
-  console.log(`\n[Step 2] Connecting ${TOTAL_BOTS} bots concurrently (mixed 1.21.4 and 26.2)...`)
+  console.log(`\n[Step 2] Connecting ${TOTAL_BOTS} bots concurrently with native 26.1...`)
 
   const bots = []
   const connectedBots = new Set()
@@ -48,7 +45,7 @@ async function runStressTest() {
   const errors = []
 
   for (let i = 0; i < TOTAL_BOTS; i++) {
-    const versionInput = i % 2 === 0 ? '1.21.4' : '26.2'
+    const versionInput = '26.1'
     const resolvedVer = resolveBotVersion(versionInput)
     const username = `StressBot_${i + 1}`
 

@@ -61,6 +61,7 @@ global.requestAnimationFrame = (cb) => {
 const chatQueue = []
 let chatFlushScheduled = false
 const MAX_CHAT_NODES = 250
+const MAX_CHAT_ITEMS_PER_FRAME = 75
 
 function getLocalTimestamp() {
   return '[12:00:00]'
@@ -88,7 +89,7 @@ function flushChatQueue() {
   if (!chatBox || chatQueue.length === 0) return
 
   const scroll = document.getElementById('autoScrollChat')?.checked
-  const itemsToRender = chatQueue.splice(0, chatQueue.length)
+  const itemsToRender = chatQueue.splice(0, MAX_CHAT_ITEMS_PER_FRAME)
   const fragment = document.createDocumentFragment()
 
   for (let i = 0; i < itemsToRender.length; i++) {
@@ -126,6 +127,11 @@ function flushChatQueue() {
   if (scroll) {
     chatBox.scrollTop = chatBox.scrollHeight
   }
+
+  if (chatQueue.length > 0 && !chatFlushScheduled) {
+    chatFlushScheduled = true
+    requestAnimationFrame(flushChatQueue)
+  }
 }
 
 function logConsole(tag, text, lineClass = 'line-server', source = '') {
@@ -152,11 +158,6 @@ function logConsole(tag, text, lineClass = 'line-server', source = '') {
   }
 }
 
-function logChat(prefix, name, text) {
-  const tag = name ? `${prefix}/${name}` : prefix
-  logConsole(tag, text, 'line-bot', name)
-}
-
 // Test 1: Bombard with 1,000 chat messages rapidly
 console.log('--- Test 1: Rapid 1000 messages burst ---')
 const startTime = Date.now()
@@ -171,7 +172,13 @@ assert.strictEqual(chatQueue.length, MAX_CHAT_NODES, 'Queue must be capped to MA
 // Test 2: Trigger the RAF flush
 console.log('--- Test 2: Batch flush via DocumentFragment ---')
 assert.ok(pendingRaf !== null, 'pendingRaf must exist')
-pendingRaf() // Execute RAF
+pendingRaf() // Execute first bounded frame
+assert.strictEqual(
+  mockChatBox.children.length,
+  MAX_CHAT_ITEMS_PER_FRAME,
+  'A frame must render only the bounded chunk'
+)
+while (chatFlushScheduled) pendingRaf()
 
 assert.strictEqual(
   mockChatBox.children.length,

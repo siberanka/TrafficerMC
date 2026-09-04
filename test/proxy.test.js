@@ -53,6 +53,7 @@ console.log('--- Testing Proxy Scraper & HTTP Tunnel Mechanics ---')
   const DEST_PORT = 19189
 
   const mockDestServer = net.createServer((socket) => {
+    socket.on('error', () => {})
     socket.on('data', (data) => {
       if (data.toString() === 'HELLO_DEST') {
         socket.write('DEST_RESPONSE_OK')
@@ -103,19 +104,24 @@ console.log('--- Testing Proxy Scraper & HTTP Tunnel Mechanics ---')
   })
 }
 
-// 4. Test Live Web Scraper
+// 4. Test scraper against an isolated local source. Public proxy lists are
+// volatile and must not make the deterministic test suite flaky.
 {
-  console.log('Testing live scrapeProxy for socks5 and http...')
-  const [socks5Result, httpResult] = await Promise.all([scrapeProxy('socks5'), scrapeProxy('http')])
-
-  const socks5Count = socks5Result ? socks5Result.trim().split(/\r?\n/).filter(Boolean).length : 0
-  const httpCount = httpResult ? httpResult.trim().split(/\r?\n/).filter(Boolean).length : 0
-
-  assert.ok(socks5Count > 50, `Expected at least 50 SOCKS5 proxies, got ${socks5Count}`)
-  assert.ok(httpCount > 50, `Expected at least 50 HTTP proxies, got ${httpCount}`)
-
-  console.log(
-    `✓ Live scrapeProxy verified: ${socks5Count} SOCKS5 proxies, ${httpCount} HTTP proxies downloaded`
-  )
-  process.exit(0)
+  const sourcePort = 19190
+  const sourceServer = http.createServer((_request, response) => {
+    response.writeHead(200, { 'content-type': 'text/plain' })
+    response.end('198.51.100.10:8080\n203.0.113.20:1080\n198.51.100.10:8080\n')
+  })
+  await new Promise((resolve) => sourceServer.listen(sourcePort, '127.0.0.1', resolve))
+  try {
+    const result = await scrapeProxy({
+      proxyType: 'socks5',
+      source: 'custom',
+      customUrls: `http://127.0.0.1:${sourcePort}/proxies.txt`
+    })
+    assert.deepStrictEqual(result.split('\n').sort(), ['198.51.100.10:8080', '203.0.113.20:1080'])
+    console.log('✓ Isolated scraper source and deduplication verified')
+  } finally {
+    await new Promise((resolve) => sourceServer.close(resolve))
+  }
 }

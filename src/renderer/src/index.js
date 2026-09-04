@@ -14,12 +14,12 @@ window.addEventListener('DOMContentLoaded', () => {
           notify('Warning', 'New version available. Please update your client', 'warning')
         }
       })
-    document.getElementById('versionString').innerHTML = `v${version.current}`
+    document.getElementById('versionString').textContent = `v${version.current}`
   })
 
   window.electron?.ipcRenderer.on('fileSelected', (event, id, path) => {
     const filename = path.match(/[^\\]+$/)[0]
-    document.getElementById(id).innerHTML = filename
+    document.getElementById(id).textContent = filename
   })
 
   window.electron?.ipcRenderer.on('showBottab', () => {
@@ -84,7 +84,7 @@ window.addEventListener('DOMContentLoaded', () => {
     } else {
       logProxy(info.proxy, info.event, info.message)
     }
-    document.getElementById('proxyCheckStatusCount').innerHTML = info.count
+    document.getElementById('proxyCheckStatusCount').textContent = info.count
     switch (info.event) {
       case 'start':
         document.getElementById('proxyCheckStatus').style.display = 'block'
@@ -108,7 +108,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   })
 
-  function updateConsoleLeadUI(leadBot, isFailover = false) {
+  function updateConsoleLeadUI(leadBot) {
     const badge = document.getElementById('consoleLeadBadge')
     const text = document.getElementById('consoleLeadText')
     if (!badge || !text) return
@@ -164,7 +164,7 @@ window.addEventListener('DOMContentLoaded', () => {
       }
       case 'authmsg':
         directChat(
-          `<div class="space-h"><div class="flex"><p class="text-sm link">Auth</p></div><div class="space-h-f pl-2"><p class="text-sm" style="user-select: text;">${info.id}</p></div></div><p class="text-sm-2" style="user-select: text;"> First time signing in. Use a web browser to open the page <a href="https://www.microsoft.com/link" target="_blank" rel="noreferrer" class="text-sm-2">https://www.microsoft.com/link</a> and enter the code: <a class="text-sm-2" style="border-bottom: solid 1px #a1a1a1; cursor: pointer;" onclick="navigator.clipboard.writeText('${info.message}')">${info.message} [click to copy]</a></p>`
+          `<div class="space-h"><div class="flex"><p class="text-sm link">Auth</p></div><div class="space-h-f pl-2"><p class="text-sm" style="user-select: text;">${escapeHtml(info.id)}</p></div></div><p class="text-sm-2" style="user-select: text;"> First time signing in. Use a web browser to open the page <a href="https://www.microsoft.com/link" target="_blank" rel="noreferrer" class="text-sm-2">https://www.microsoft.com/link</a> and enter the code: <span class="text-sm-2" style="border-bottom: solid 1px #a1a1a1; user-select: all;">${escapeHtml(info.message)}</span></p>`
         )
         break
       case 'easymcAuth':
@@ -195,6 +195,10 @@ window.addEventListener('DOMContentLoaded', () => {
             : info.message
         logConsole('System', `${info.id} disconnected: ${endMsg}`, 'line-system', info.id)
         removePlayer(info.id)
+        break
+      }
+      case 'clearBots': {
+        clearAllPlayers()
         break
       }
       default:
@@ -307,7 +311,7 @@ function renderSpammerMessages() {
     const emptyMsg = document.createElement('p')
     emptyMsg.className = 'text-sm-2'
     emptyMsg.style = 'color: #64748b; font-style: italic; margin: 4px 0;'
-    emptyMsg.innerHTML = 'No messages added yet. Add messages above.'
+    emptyMsg.textContent = 'No messages added yet. Add messages above.'
     container.appendChild(emptyMsg)
     return
   }
@@ -317,7 +321,7 @@ function renderSpammerMessages() {
     card.className = 'spammer-msg-card'
 
     const span = document.createElement('span')
-    span.innerHTML = msg
+    span.textContent = msg
     card.appendChild(span)
 
     const del = document.createElement('span')
@@ -389,13 +393,16 @@ function buttonClick(event) {
       window.electron?.ipcRenderer.send('open', 'nameFileLabel', 'Name File')
       break
     case 'selectAll':
-      selectAll()
+      selectAll(true)
+      break
+    case 'deselectAll':
+      selectAll(false)
       break
     case 'proxyClearDupe':
       clearDupe()
       notify('Info', 'Cleared duplicate proxies', 'success')
       break
-    case 'btnChat':
+    case 'btnChat': {
       const chatVal = document.getElementById('chatMsg')?.value?.trim()
       if (chatVal) {
         window.electron?.ipcRenderer.send('sendChat', chatVal)
@@ -403,6 +410,7 @@ function buttonClick(event) {
         notify('Warning', 'Please enter a message or command to send', 'error')
       }
       break
+    }
     case 'btnAddSpamMsg':
       addSpamMessageFromInput()
       break
@@ -540,7 +548,7 @@ function debouncedUpdateSelected() {
   if (updateSelectedTimeout) clearTimeout(updateSelectedTimeout)
   updateSelectedTimeout = setTimeout(() => {
     updateSelected()
-  }, 50)
+  }, 40)
 }
 
 function addPlayer(name) {
@@ -549,27 +557,44 @@ function addPlayer(name) {
   const cleanName = String(name).trim()
 
   // Prevent duplicate list items
-  const existing = Array.from(list.children).find((li) => li.textContent.trim() === cleanName)
+  const existing = Array.from(list.children).find(
+    (li) => li.dataset.username === cleanName || li.textContent.trim() === cleanName
+  )
   if (existing) {
+    existing.dataset.username = cleanName
     const auto = document.getElementById('autoSelect')?.checked ?? true
     if (auto) existing.classList.add('selected')
-    updateSelected()
+    updateBotCount()
+    debouncedUpdateSelected()
     return
   }
 
   const auto = document.getElementById('autoSelect')?.checked ?? true
   const b = document.createElement('li')
   b.className = 'botListItem'
+  b.dataset.username = cleanName
   if (auto) b.classList.add('selected')
-  b.textContent = cleanName
+
+  const check = document.createElement('span')
+  check.className = 'bot-check'
+
+  const nameSpan = document.createElement('span')
+  nameSpan.className = 'bot-name'
+  nameSpan.textContent = cleanName
+
+  b.appendChild(check)
+  b.appendChild(nameSpan)
+
   b.onclick = () => {
     b.classList.toggle('selected')
-    updateSelected()
+    updateBotCount()
+    debouncedUpdateSelected()
   }
+
   list.appendChild(b)
   list.scrollTop = list.scrollHeight
   updateBotCount()
-  updateSelected()
+  debouncedUpdateSelected()
 }
 
 function removePlayer(name) {
@@ -577,22 +602,42 @@ function removePlayer(name) {
   const cleanName = String(name).trim()
   let changed = false
   list.forEach((bot) => {
-    if (bot.textContent.trim() === cleanName) {
+    if (bot.dataset.username === cleanName || bot.textContent.trim() === cleanName) {
       bot.remove()
       changed = true
     }
   })
   if (changed) {
     updateBotCount()
-    updateSelected()
+    debouncedUpdateSelected()
+  }
+}
+
+function clearAllPlayers() {
+  const list = document.getElementById('botList')
+  if (list) {
+    list.innerHTML = ''
+    updateBotCount()
+    debouncedUpdateSelected()
   }
 }
 
 function updateBotCount() {
-  const count = document.getElementById('botCount')
   const list = document.getElementById('botList')
-  if (count && list) {
-    count.innerHTML = list.children.length
+  if (!list) return
+  const total = list.children.length
+  const selected = Array.from(list.children).filter((bot) =>
+    bot.classList.contains('selected')
+  ).length
+
+  const badge = document.getElementById('botCountBadge')
+  if (badge) {
+    badge.textContent = `${selected} / ${total}`
+  }
+
+  const countLegacy = document.getElementById('botCount')
+  if (countLegacy) {
+    countLegacy.innerHTML = total
   }
 }
 
@@ -604,6 +649,7 @@ function selectAll(forceState) {
   Array.from(list.children).forEach((bot) => {
     bot.classList.toggle('selected', targetState)
   })
+  updateBotCount()
   updateSelected()
 }
 
@@ -611,7 +657,14 @@ function updateSelected() {
   const list = document.getElementById('botList')
   if (!list) return
   const selectedBots = Array.from(list.children).filter((bot) => bot.classList.contains('selected'))
-  const selectedNames = selectedBots.map((bot) => bot.textContent.trim()).filter(Boolean)
+  const selectedNames = selectedBots
+    .map(
+      (bot) =>
+        bot.dataset.username ||
+        bot.querySelector('.bot-name')?.textContent?.trim() ||
+        bot.textContent.trim()
+    )
+    .filter(Boolean)
   window.electron?.ipcRenderer.send('playerList', selectedNames)
 }
 
@@ -634,18 +687,18 @@ function logProxy(proxy, type, message) {
   const msg = document.createElement('p')
   msg.className = 'text-sm-2 mu-1'
   msg.style = 'user-select: text;'
-  msg.innerHTML = message
+  msg.textContent = message
   ddiv.appendChild(msg)
 
   const pl = document.createElement('p')
   pl.style = 'user-select: text;'
   pl.className = 'text-sm'
-  pl.innerHTML = proxy
+  pl.textContent = proxy
   updiv.appendChild(pl)
 
   const pr = document.createElement('p')
   pr.className = 'text-sm'
-  pr.innerHTML = type
+  pr.textContent = type
 
   updiv.appendChild(pr)
 
@@ -696,6 +749,7 @@ function updateProxyList() {
 const chatQueue = []
 let chatFlushScheduled = false
 const MAX_CHAT_NODES = 250
+const MAX_CHAT_ITEMS_PER_FRAME = 75
 
 function getLocalTimestamp() {
   const now = new Date()
@@ -727,7 +781,7 @@ function flushChatQueue() {
   if (!chatBox || chatQueue.length === 0) return
 
   const scroll = document.getElementById('autoScrollChat')?.checked
-  const itemsToRender = chatQueue.splice(0, chatQueue.length)
+  const itemsToRender = chatQueue.splice(0, MAX_CHAT_ITEMS_PER_FRAME)
   const fragment = document.createDocumentFragment()
 
   for (let i = 0; i < itemsToRender.length; i++) {
@@ -767,6 +821,11 @@ function flushChatQueue() {
   if (scroll) {
     chatBox.scrollTop = chatBox.scrollHeight
   }
+
+  if (chatQueue.length > 0 && !chatFlushScheduled) {
+    chatFlushScheduled = true
+    requestAnimationFrame(flushChatQueue)
+  }
 }
 
 function logConsole(tag, text, lineClass = 'line-server', source = '') {
@@ -791,11 +850,6 @@ function logConsole(tag, text, lineClass = 'line-server', source = '') {
     chatFlushScheduled = true
     requestAnimationFrame(flushChatQueue)
   }
-}
-
-function logChat(prefix, name, text) {
-  const tag = name ? `${prefix}/${name}` : prefix
-  logConsole(tag, text, 'line-bot', name)
 }
 
 function directChat(string) {

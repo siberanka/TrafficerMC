@@ -3,11 +3,11 @@ productName: TrafficerMC
 directories:
   buildResources: build
 files:
-  - '!**/.vscode/*'
-  - '!src/*'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  # Package only the compiled application. electron-builder adds production
+  # dependencies from package.json separately; tests, worlds, logs and local
+  # credentials therefore cannot leak into a public artifact.
+  - out/**/*
+  - package.json
 asarUnpack:
   - resources/**
 win:

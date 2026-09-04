@@ -1,10 +1,12 @@
 import assert from 'assert'
 import EventEmitter from 'events'
+import nbt from 'prismarine-nbt'
 import {
   extractText,
   isRegisterPrompt,
   isLoginPrompt,
   isAuthSuccess,
+  createCustomClickActionPacket,
   autoAuth
 } from '../src/main/js/misc/autoAuth.js'
 
@@ -337,7 +339,7 @@ assert.strictEqual(isAuthSuccess('Please enter your password'), false)
   bot.emit('messagestr', 'Please register with /register <password>')
 
   setTimeout(() => {
-    assert.strictEqual(bot.chatCommands[0], '/register trafficermc123a trafficermc123a')
+    assert.strictEqual(bot.chatCommands[0], '/register trafficermc123a')
 
     // Server sends: You already have registered this username!
     bot.emit('messagestr', 'You already have registered this username!')
@@ -354,3 +356,59 @@ assert.strictEqual(isAuthSuccess('Please enter your password'), false)
 }
 
 console.log('✓ All Auto-Auth unit tests setup complete and running!')
+
+// The custom-click payload is length-prefixed NBT, not a Boolean optional value.
+{
+  const action = 'authme:prejoin-login/submit'
+  const packet = createCustomClickActionPacket(action, { password: 'safe-test-password' })
+  const payloadLengthOffset = 2 + Buffer.byteLength(action)
+  assert.strictEqual(packet[0], 0x08, 'Configuration custom-click packet id must be 0x08')
+  assert.strictEqual(packet[1], Buffer.byteLength(action))
+  assert.strictEqual(
+    packet[payloadLengthOffset],
+    packet.length - payloadLengthOffset - 1,
+    'NBT byte length must prefix the entire anonymous compound'
+  )
+}
+
+// 12. AuthMe 6 Paper pre-join forms must be answered during CONFIGURATION,
+// without attempting an invalid chat command before PLAY.
+{
+  class ConfigurationBot extends EventEmitter {
+    constructor() {
+      super()
+      this._client = new EventEmitter()
+      this._client.username = 'PreJoinBot'
+      this._client.state = 'configuration'
+      this._client.ended = false
+      this.writes = []
+      this.chats = []
+      this._client.write = (name, data) => this.writes.push({ name, data })
+    }
+    chat(command) {
+      this.chats.push(command)
+    }
+  }
+
+  const bot = new ConfigurationBot()
+  autoAuth(bot, { enabled: true, password: 'safe-test-password', delay: 0 })
+  bot._client.emit('show_dialog', {
+    dialog: nbt.comp({
+      title: nbt.string('Register'),
+      password: nbt.string('password'),
+      confirm: nbt.string('confirm'),
+      action: nbt.string('authme:prejoin-register/submit')
+    })
+  })
+
+  assert.strictEqual(bot.chats.length, 0, 'Pre-join flow must not send a chat packet')
+  assert.strictEqual(bot.writes.length, 1)
+  assert.strictEqual(bot.writes[0].name, 'custom_click_action')
+  assert.strictEqual(bot.writes[0].data.id, 'authme:prejoin-register/submit')
+  assert.deepStrictEqual(nbt.simplify(bot.writes[0].data.nbt), {
+    password: 'safe-test-password',
+    confirm: 'safe-test-password'
+  })
+  assert.strictEqual(bot.autoAuth.phase, 'prejoin-submitted')
+  console.log('✓ AuthMe 6 configuration-phase pre-join form submission passed')
+}

@@ -77,6 +77,38 @@
                 </div>
 
                 <div class="ui-field">
+                  <label class="containerCheckbox">
+                    Auto reconnect
+                    <input id="autoReconnect" type="checkbox" />
+                    <span class="checkmark"></span>
+                  </label>
+                </div>
+
+                <div class="ui-field">
+                  <span class="text-sm">Rejoin delay (random ms):</span>
+                  <div class="flex" style="gap: 8px; width: 100%">
+                    <input
+                      id="reconnectDelayMin"
+                      type="number"
+                      min="3000"
+                      max="300000"
+                      step="500"
+                      placeholder="Min 8000"
+                      title="Minimum reconnect delay in milliseconds"
+                    />
+                    <input
+                      id="reconnectDelayMax"
+                      type="number"
+                      min="3000"
+                      max="300000"
+                      step="500"
+                      placeholder="Max 15000"
+                      title="Maximum reconnect delay in milliseconds"
+                    />
+                  </div>
+                </div>
+
+                <div class="ui-field">
                   <span class="text-sm">Join message:</span>
                   <input id="joinMessage" type="text" placeholder="/register" />
                 </div>
@@ -123,9 +155,7 @@
                   <span class="text-sm">Version:</span>
                   <select id="version">
                     <option value="">Auto Detect</option>
-                    <option value="26.2">26.2</option>
                     <option value="26.1">26.1</option>
-                    <option value="26.0">26.0</option>
                     <option value="1.21.11">1.21.11</option>
                     <option value="1.21.10">1.21.10</option>
                     <option value="1.21.9">1.21.9</option>
@@ -227,17 +257,37 @@
                 "
               >
                 <div class="ui-card" style="padding: 12px; gap: 8px">
-                  <span class="text-sm" style="color: #ffffff">Connected Bots</span>
+                  <div
+                    class="space-h"
+                    style="justify-content: space-between; align-items: center; width: 100%"
+                  >
+                    <span class="text-sm" style="color: #ffffff; font-weight: 600">Bots</span>
+                    <span id="botCountBadge" class="bot-count-badge">0 / 0</span>
+                  </div>
                   <ul id="botList" class="border"></ul>
-                  <div class="space-h" style="margin-top: 4px">
-                    <label class="containerCheckbox">
+                  <div
+                    class="space-h"
+                    style="margin-top: 4px; justify-content: space-between; align-items: center"
+                  >
+                    <label class="containerCheckbox" style="font-size: 11px">
                       Auto
                       <input id="autoSelect" type="checkbox" checked />
                       <span class="checkmark"></span>
                     </label>
-                    <button id="selectAll" style="padding: 4px 10px; font-size: 11px">
-                      Select All
-                    </button>
+                    <div style="display: flex; gap: 4px">
+                      <button id="selectAll" style="padding: 3px 7px; font-size: 10px">All</button>
+                      <button
+                        id="deselectAll"
+                        style="
+                          padding: 3px 7px;
+                          font-size: 10px;
+                          background: #334155;
+                          border-color: #475569;
+                        "
+                      >
+                        None
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -1473,20 +1523,6 @@
               <span class="checkmark"></span>
             </label>
             <input id="linearDelay" type="number" style="width: 140px" placeholder="100 (ms)" />
-          </div>
-
-          <div class="ui-field">
-            <label class="containerCheckbox">
-              Auto Reconnect
-              <input id="autoReconnect" type="checkbox" />
-              <span class="checkmark"></span>
-            </label>
-            <input
-              id="reconnectDelay"
-              type="number"
-              style="width: 140px"
-              placeholder="Delay 100 (ms)"
-            />
           </div>
 
           <div style="border-top: 1px solid var(--ev-border); padding-top: 8px; margin-top: 4px">

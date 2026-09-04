@@ -1,24 +1,44 @@
+import minecraftProtocol from 'minecraft-protocol'
+import minecraftData from 'minecraft-data'
+
+const supportedVersions = new Set(minecraftProtocol.supportedVersions)
+const protocolVersions = minecraftData.versions.pc
+const aliases = new Map([
+  ['1.8', '1.8.8'],
+  ['1.8.9', '1.8.8'],
+  ['1.9', '1.9.4'],
+  ['1.10', '1.10.2'],
+  ['1.11', '1.11.2'],
+  ['1.12', '1.12.2'],
+  ['1.13', '1.13.2'],
+  ['1.14', '1.14.4'],
+  ['1.15', '1.15.2'],
+  ['1.16', '1.16.5'],
+  ['1.17', '1.17.1'],
+  ['1.18', '1.18.2']
+])
+
 /**
- * Resolves Minecraft version to the closest supported protocol version in minecraft-protocol.
- * Supports versions from 1.8.x up to 26.2 (including 26.2, 26.1, 26.0, 1.21.11, etc.)
+ * Resolves only protocol-equivalent releases. A newer, incompatible protocol is
+ * never silently impersonated as an older version because chat/command packets
+ * can then appear to work while being rejected or causing a disconnect.
  */
 export function resolveBotVersion(version) {
-  if (!version) return
+  if (!version) return undefined
+  const requested = String(version).trim()
+  const alias = aliases.get(requested)
+  if (alias) return alias
+  if (supportedVersions.has(requested)) return requested
 
-  // Handle 26.x versions (e.g. 26.2, 26.1, 26.0 -> maps to 26.1)
-  const match26 = version.match(/^26\.(\d+)(?:\.(\d+))?$/)
-  if (match26) {
-    return '26.1'
-  }
+  const requestedData = protocolVersions.find((entry) => entry.minecraftVersion === requested)
+  if (!requestedData) return undefined
+  const equivalent = protocolVersions.find(
+    (entry) =>
+      entry.version === requestedData.version && supportedVersions.has(entry.minecraftVersion)
+  )
+  return equivalent?.minecraftVersion
+}
 
-  // Handle 1.21.x versions matching minecraft-protocol supported list
-  const match = version.match(/^1\.21\.(\d+)$/)
-  if (match) {
-    const patch = parseInt(match[1], 10)
-    const supportedPatches = [1, 3, 4, 5, 6, 8, 9, 11]
-    const nearestPatch = [...supportedPatches].reverse().find((value) => patch >= value) ?? 1
-    return `1.21.${nearestPatch}`
-  }
-
-  return version
+export function isVersionSupported(version) {
+  return !version || resolveBotVersion(version) !== undefined
 }

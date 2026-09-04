@@ -1,159 +1,82 @@
 <p align="center">
-  <img src="./src/renderer/assets/icons/icon.png" width="96" height="96" alt="TrafficerMC Logo" />
+  <img src="./src/renderer/assets/icons/icon.png" width="96" height="96" alt="TrafficerMC logo" />
 </p>
 
 <h1 align="center">TrafficerMC</h1>
 
-<p align="center">
-  <b>High-Performance Minecraft Botting, Stress Testing & Proxy Tool</b>
-</p>
+<p align="center"><strong>Authorized Minecraft client and network testing tool</strong></p>
 
 <p align="center">
-  <a href="https://github.com/siberanka/TrafficerMC/releases/latest">
-    <img src="https://img.shields.io/github/v/release/siberanka/TrafficerMC?color=0ea5e9&style=for-the-badge" alt="Latest Release" />
-  </a>
-  <a href="https://github.com/siberanka/TrafficerMC/releases">
-    <img src="https://img.shields.io/github/downloads/siberanka/TrafficerMC/total?color=0ea5e9&style=for-the-badge" alt="Total Downloads" />
-  </a>
-  <a href="https://discord.gg/uFpaAZdVgS">
-    <img src="https://img.shields.io/discord/935341227400904734?label=DISCORD&color=5865F2&style=for-the-badge" alt="Discord" />
-  </a>
+  <a href="https://github.com/siberanka/TrafficerMC/releases/latest"><img src="https://img.shields.io/github/v/release/siberanka/TrafficerMC?style=for-the-badge" alt="Latest release" /></a>
+  <a href="https://github.com/siberanka/TrafficerMC/releases"><img src="https://img.shields.io/github/downloads/siberanka/TrafficerMC/total?style=for-the-badge" alt="Downloads" /></a>
 </p>
 
----
+> [!WARNING]
+> Use TrafficerMC only on servers and proxy infrastructure you own or are explicitly authorized to test. Do not use it for disruption, unsolicited load, credential collection, access-control bypass, ban evasion, or attacks on public services. You are responsible for permission, rate limits, privacy, and applicable law.
 
-## 🌟 Key Features
+TrafficerMC helps server owners reproduce client, authentication, proxy, chat, command, inventory, and automation behavior in controlled Minecraft test environments. Start with one client, keep conservative delays, monitor the server, and stop immediately if the target becomes unhealthy.
 
-TrafficerMC is a modern, modular, and high-performance Minecraft client orchestration tool:
+## Current development status
 
-- 🔐 **AuthMe Reloaded 6.0+ Auto-Auth**: Automatic pre-login and in-game authentication handling `/register` and `/login` via chat commands, modern dialog packets (`open_dialog`), titles, and actionbars. Default password: `trafficermc123a`.
-- 🌐 **Live Multi-Source Proxy Scraper**: Download thousands of live HTTP/SOCKS5 proxies with a single click from ProxyScrape API v4/v2, popular GitHub repositories, Geonode API, and custom user-defined Raw URLs.
-- 🛡️ **Anonymity Level Filtering**: Filter scraped proxies by anonymity (`Elite`, `Anonymous`, `Transparent`, `All`).
-- ⚡ **HTTP CONNECT & SOCKS5 Tunneling**: Full proxy authentication and socket tunneling support with latency and timeout checkers.
-- 🎮 **Extended Minecraft Version Support**: Supports all protocol versions from **1.8.x up to 26.2** (including 1.21.11, 26.0, 26.1, 26.2).
-- 🎨 **Modern, Sleek & Fluid UI**: Fluid, card-based dark theme (`#0d1117`) layout with expanded 1040x640 dimensions, eliminating cluttered inline styles, noisy tiled backgrounds, and legacy blur effects.
-- 📦 **Zero-Install Portable Executable**: Standalone Windows executable (`TrafficerMC 3.6.0.exe`) available directly from GitHub Releases.
-- 🤖 **Comprehensive Botting Controls**:
-  - Multi-bot management & auto-selection
-  - Anti-AFK module
-  - Chat spammer with delay & bypass modes
-  - Hotbar & Inventory window manager
-  - Directional movement & look control
-  - KillAura with target filters (Players, Vehicles, Mobs, Animals)
-  - Custom script runner (`scripting`)
-  - Discord webhook integration
+Version remains **3.6.0** while stabilization continues. The update log for the current 3.6.0 development line is maintained in [CHANGELOG.md](CHANGELOG.md); these fixes do not claim a new stable release.
 
----
+Native protocol support follows the installed Mineflayer/minecraft-protocol stack: **1.7 through 26.1**, with protocol-equivalent patch aliases such as 1.21.7 → 1.21.8 and 1.21.10 → 1.21.9. Minecraft 26.2 uses a different protocol and is not silently downgraded to 26.1. Use it only after the upstream stack adds native support; a ViaVersion bridge may connect but is not considered full compatibility.
 
-## 📸 Screenshots (v3.6.0 Modern UI)
+## Features
 
-### General Tab (Connection & Configuration)
+- Protocol-safe, per-client queued chat and command delivery.
+- AuthMe 6 configuration-phase pre-join dialog automation, including the corrected length-prefixed NBT response.
+- Chat/title/actionbar automation for AuthMe, nLogin, OpeNLogin, LoginSecurity, LimboAuth, LibreLogin, mLogin, and JPremium-style `/login` and `/register` prompts.
+- Proxy/backend transfer handling without duplicate teleport confirmations.
+- Configurable randomized reconnect delay on the main connection card (safe default: 8-15 seconds).
+- HTTP CONNECT and SOCKS proxy support and isolated proxy checking.
+- Anti-AFK, inventory/hotbar controls, movement, scripting, and multi-client management.
+- Bounded, frame-batched UI logs to avoid unbounded DOM growth and long rendering frames.
 
-![General Tab](docs/images/general.png)
+Authentication prompts are server-configurable, so compatibility means the standard command/form flows covered by the test matrix. Captcha, TOTP, recovery codes, custom PIN keyboards, and server-specific challenges intentionally require an explicit integration.
 
-### Botting Tab (Controls & Chat)
+## Local test networks
 
-![Botting Tab](docs/images/botting.png)
+The repository contains two isolated profiles under [`test/networks`](test/networks):
 
-### Proxy Tab (Live Scraper & Tester)
+- `direct`: a real local Paper backend with AuthMe 6 pre-join registration, chat echo, and command-response verification.
+- `proxy`: a deterministic TCP proxy-transfer harness plus an opt-in real Velocity process with two local backends; both verify `/server`, re-authentication, and disconnect detection.
 
-![Proxy Tab](docs/images/proxy.png)
+Ordinary tests do not contact public Minecraft servers and do not contain production credentials.
 
-### Scripting Tab (Automation & Actions)
+```powershell
+npm install
+npm test
+npm run build
+```
 
-![Scripting Tab](docs/images/scripting.png)
+The opt-in direct live test expects the authorized local Paper/AuthMe fixture on `127.0.0.1:25577`:
 
-### Settings Modal (Preferences & Delays)
+```powershell
+node test/networks/direct/authmePaperLive.test.js
+```
 
-![Settings Modal](docs/images/settings.png)
+See the README in each network profile for fixture details. Server binaries, worlds, databases, logs, and secrets belong in ignored `test/runtime/`; never commit them.
 
----
+## Development
 
-## 🚀 Quick Start & Download
+Requires Node.js 18 or newer and Git.
 
-### Download Executable
-
-Directly download the latest portable Windows executable from the Releases page:
-👉 **[Download TrafficerMC Latest Release](https://github.com/siberanka/TrafficerMC/releases/latest)**
-
-Simply run `TrafficerMC.exe` — no installer or Node.js runtime required.
-
----
-
-## 🛠️ Building from Source
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18 or higher recommended)
-- Git
-
-### Installation & Run
-
-```bash
-# Clone the repository
+```powershell
 git clone https://github.com/siberanka/TrafficerMC.git
 cd TrafficerMC
-
-# Install dependencies
 npm install
-
-# Run automated tests
-npm test
-
-# Run development mode
 npm run dev
 ```
 
-### Packaging Executable
+Packaging is available through `npm run build:win`, `npm run build:linux`, `npm run build:mac`, or `npm run build:unpack`. CI/CD is not required to run or validate the project.
 
-```bash
-# Windows Portable .exe
-npm run build:win
+## Screenshots
 
-# Unpacked directory for inspection
-npm run build:unpack
+| General                                 | Botting                                 | Proxy                               |
+| --------------------------------------- | --------------------------------------- | ----------------------------------- |
+| ![General tab](docs/images/general.png) | ![Botting tab](docs/images/botting.png) | ![Proxy tab](docs/images/proxy.png) |
 
-# Linux
-npm run build:linux
+## License and attribution
 
-# macOS
-npm run build:mac
-```
-
----
-
-## 📜 Scripting Syntax
-
-The built-in scripting engine enables multi-action automation sequences:
-
-```text
-chat Hello from TrafficerMC!
-delay 1000
-useheld
-delay 2000
-winclick 36 0
-delay 1000
-disconnect
-```
-
-### Supported Commands
-
-- `chat <message>`: Send server chat (supports `{player}` and `{random}`)
-- `delay <ms>`: Pause execution for specified milliseconds
-- `useHeld`: Use currently equipped hotbar item
-- `setHotbar <0-8>`: Select hotbar slot
-- `winClick <slot> <type>`: Click window/inventory item (`0` = left click, `1` = right click)
-- `closeWindow`: Close open container window
-- `drop [slot]`: Drop specific slot item or all items
-- `startMove <direction>` / `stopMove <direction>`: Directional movement (`forward`, `back`, `left`, `right`, `jump`, `sneak`, `sprint`)
-- `resetMove`: Reset all movement states
-- `afkOn` / `afkOff`: Toggle Anti-AFK module
-- `disconnect` / `reconnect`: Manage connection state
-- `startScript`: Loop the script from the start
-
----
-
-## 📄 License
-
-This project is open-source under the [MIT License](LICENSE).
-Fork maintained by [siberanka](https://github.com/siberanka).
+TrafficerMC is distributed under the [MIT License](LICENSE). The copyright notice for original author **RattlesHyper (2022)** is preserved in the license and distributions. This fork is maintained by [siberanka](https://github.com/siberanka/TrafficerMC). Third-party runtime components remain under their respective licenses; see [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).

@@ -37,7 +37,7 @@ console.log('=== Running Multi-Bot Chat & Spammer Resolution Unit Tests ===')
   activeBots.set('BetaBot', bot2)
   activeBots.set('GammaBot', bot3)
 
-  function getBot(username) {
+  const getBot = (username) => {
     if (!username) return null
     if (activeBots.has(username)) return activeBots.get(username)
     const lower = String(username).toLowerCase().trim()
@@ -53,7 +53,7 @@ console.log('=== Running Multi-Bot Chat & Spammer Resolution Unit Tests ===')
     return null
   }
 
-  function getAllUniqueBots() {
+  const getAllUniqueBots = () => {
     const bots = []
     const seen = new Set()
     for (const bot of activeBots.values()) {

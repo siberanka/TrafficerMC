@@ -1,5 +1,8 @@
 import crypto from 'crypto'
 
+const sendQueues = new WeakMap()
+const lastSendTimes = new WeakMap()
+
 /**
  * Leet speak dictionary
  */
@@ -162,12 +165,43 @@ export function getNextMessage(messages, pattern = 'random', state = { index: 0 
   return cleanList[randomIndex]
 }
 
+function waitForPlay(bot, timeoutMs) {
+  const client = bot?._client
+  if (!client || client.ended || client.state === 'play')
+    return Promise.resolve(client?.state === 'play')
+  return new Promise((resolve) => {
+    let settled = false
+    const finish = (ready) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      client.off?.('state', onState)
+      bot.off?.('end', onEnd)
+      resolve(ready)
+    }
+    const onState = (state) => state === 'play' && finish(true)
+    const onEnd = () => finish(false)
+    const timer = setTimeout(() => finish(false), timeoutMs)
+    client.on?.('state', onState)
+    bot.once?.('end', onEnd)
+  })
+}
+
+function enqueueBotSend(bot, task) {
+  const previous = sendQueues.get(bot) || Promise.resolve()
+  const current = previous.catch(() => false).then(task)
+  sendQueues.set(bot, current)
+  const cleanup = () => {
+    if (sendQueues.get(bot) === current) sendQueues.delete(bot)
+  }
+  current.then(cleanup, cleanup)
+  return current
+}
+
 /**
- * Sends a chat message or command safely across all Minecraft protocols (1.8 - 26.x).
- * - Ensures bot is spawned.
- * - Handles commands (/...) using chat_command or bot.chat.
- * - Handles regular messages using chat_message or bot.chat.
- * - Never throws uncaught exceptions.
+ * Queues chat per bot and delegates packet selection/signing to minecraft-protocol.
+ * Hand-written modern chat packets are deliberately avoided: their checksum and
+ * acknowledgement schemas vary between protocol releases.
  */
 export async function sendBotMessage(bot, rawMessage, options = {}) {
   if (!bot || !rawMessage) return false
@@ -197,80 +231,39 @@ export async function sendBotMessage(bot, rawMessage, options = {}) {
 
   if (!formatted) return false
 
-  const isSpawned = !!(
-    bot.entity ||
-    bot._client?.state === 'play' ||
-    bot._client?.socket?.writable ||
-    bot.spawned
-  )
+  return enqueueBotSend(bot, async () => {
+    const client = bot._client
+    const ready = await waitForPlay(bot, Math.max(250, Number(options.readyTimeout ?? 10000)))
+    if (!ready || !client || client.ended) {
+      options.onFailed?.(formatted, bot, 'Connection is not in play state')
+      return false
+    }
 
-  const executeSend = () => {
-    let sent = false
+    const minimumInterval = Math.max(0, Number(options.minimumInterval ?? 50))
+    const remaining = minimumInterval - (Date.now() - (lastSendTimes.get(bot) || 0))
+    if (remaining > 0) await new Promise((resolve) => setTimeout(resolve, remaining))
+    if (client.ended || client.state !== 'play') {
+      options.onFailed?.(formatted, bot, 'Connection left play state before send')
+      return false
+    }
+
     try {
-      if (formatted.startsWith('/')) {
-        const cmd = formatted.slice(1)
-        if (typeof bot.chat === 'function') {
-          bot.chat(formatted)
-          sent = true
-        } else if (bot._client && typeof bot._client.write === 'function') {
-          bot._client.write('chat_command', { command: cmd })
-          sent = true
-        }
+      // bot.chat and client.chat both use minecraft-protocol's version-aware _signedChat path.
+      if (typeof bot.chat === 'function') bot.chat(formatted)
+      else if (typeof client.chat === 'function') client.chat(formatted)
+      else if (typeof client._signedChat === 'function') client._signedChat(formatted)
+      else if (typeof client.write === 'function' && !bot.supportFeature?.('signedChat')) {
+        client.write('chat', { message: formatted })
       } else {
-        if (typeof bot.chat === 'function') {
-          bot.chat(formatted)
-          sent = true
-        } else if (bot._client && typeof bot._client.write === 'function') {
-          bot._client.write('chat_message', { message: formatted })
-          sent = true
-        }
+        options.onFailed?.(formatted, bot, 'No protocol-safe chat sender is available')
+        return false
       }
-    } catch (err) {
-      // Fallback direct write if bot.chat threw error
-      try {
-        if (bot._client && typeof bot._client.write === 'function') {
-          if (formatted.startsWith('/')) {
-            bot._client.write('chat_command', { command: formatted.slice(1) })
-          } else {
-            bot._client.write('chat_message', { message: formatted })
-          }
-          sent = true
-        }
-      } catch (_) {}
+      lastSendTimes.set(bot, Date.now())
+      options.onSent?.(formatted, bot)
+      return true
+    } catch (error) {
+      options.onFailed?.(formatted, bot, error.message || String(error))
+      return false
     }
-
-    if (sent && typeof options.onSent === 'function') {
-      try {
-        options.onSent(formatted, bot)
-      } catch (_) {}
-    }
-
-    return sent
-  }
-
-  if (isSpawned) {
-    return executeSend()
-  } else {
-    // Wait until spawn to dispatch, with safety timeout to avoid hanging
-    return new Promise((resolve) => {
-      let resolved = false
-      const done = (res) => {
-        if (!resolved) {
-          resolved = true
-          resolve(res)
-        }
-      }
-
-      const timer = setTimeout(() => {
-        done(executeSend())
-      }, 1500)
-
-      bot.once('spawn', () => {
-        clearTimeout(timer)
-        setTimeout(() => {
-          done(executeSend())
-        }, 100)
-      })
-    })
-  }
+  })
 }

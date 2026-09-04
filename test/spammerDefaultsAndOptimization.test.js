@@ -1,11 +1,7 @@
 import assert from 'assert'
 import fs from 'fs'
 import path from 'path'
-import {
-  getNextMessage,
-  applyCustomFormatter,
-  applyMessageConverter
-} from '../src/main/js/misc/spammerEngine.js'
+import { getNextMessage } from '../src/main/js/misc/spammerEngine.js'
 
 console.log(`=== Testing Spammer Defaults & Optimization Architecture ===`)
 

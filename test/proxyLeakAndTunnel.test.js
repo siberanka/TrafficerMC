@@ -14,6 +14,7 @@ const proxyRequests = []
 let proxyEstablishedTunnels = 0
 
 const httpProxy = http.createServer()
+httpProxy.on('clientError', (_error, socket) => socket.destroy())
 httpProxy.on('connect', (req, clientSocket, head) => {
   proxyRequests.push({
     url: req.url,

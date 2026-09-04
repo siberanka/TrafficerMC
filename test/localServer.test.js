@@ -31,33 +31,28 @@ console.log('--- Running Local Server & Advanced Proxy Tests ---')
   console.log('✓ getSourcesForOptions (Custom Raw URLs) passed')
 }
 
-// 2. Test Custom URLs scraping live
+// 2. Test custom URL scraping against a deterministic local feed.
 {
-  const customResult = await scrapeProxy({
-    proxyType: 'http',
-    proxySource: 'custom',
-    customProxyUrls: 'https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt'
+  const feedPort = 25584
+  const feed = http.createServer((_request, response) => {
+    response.writeHead(200, { 'content-type': 'application/json' })
+    response.end(JSON.stringify({ data: [{ ip: '198.51.100.30', port: 8080 }] }))
   })
-  const count = customResult ? customResult.trim().split(/\r?\n/).filter(Boolean).length : 0
-  assert.ok(count > 100, `Expected > 100 proxies from custom URL, got ${count}`)
-  console.log(`✓ scrapeProxy (Custom Raw URL source) verified: ${count} proxies fetched`)
+  await new Promise((resolve) => feed.listen(feedPort, '127.0.0.1', resolve))
+  try {
+    const customResult = await scrapeProxy({
+      proxyType: 'http',
+      proxySource: 'custom',
+      customProxyUrls: `http://127.0.0.1:${feedPort}/proxies.json`
+    })
+    assert.strictEqual(customResult, '198.51.100.30:8080')
+    console.log('✓ scrapeProxy local custom JSON source verified')
+  } finally {
+    await new Promise((resolve) => feed.close(resolve))
+  }
 }
 
-// 3. Test ProxyScrape API source specifically with anonymity
-{
-  const psResult = await scrapeProxy({
-    proxyType: 'socks5',
-    proxySource: 'proxyscrape',
-    proxyAnonymity: 'all'
-  })
-  const count = psResult ? psResult.trim().split(/\r?\n/).filter(Boolean).length : 0
-  assert.ok(count > 10, `Expected > 10 proxies from ProxyScrape API specifically, got ${count}`)
-  console.log(
-    `✓ scrapeProxy (ProxyScrape API source specifically) verified: ${count} proxies fetched`
-  )
-}
-
-// 4. Test Local Minecraft Server with HTTP CONNECT proxy
+// 3. Test Local Minecraft Server with HTTP CONNECT proxy
 {
   const MC_PORT = 25585
   const PROXY_PORT = 25586
