@@ -7,8 +7,10 @@
 <p align="center"><strong>Authorized Minecraft client and network testing tool</strong></p>
 
 <p align="center">
-  <a href="https://github.com/siberanka/TrafficerMC/releases/latest"><img src="https://img.shields.io/github/v/release/siberanka/TrafficerMC?style=for-the-badge" alt="Latest release" /></a>
-  <a href="https://github.com/siberanka/TrafficerMC/releases"><img src="https://img.shields.io/github/downloads/siberanka/TrafficerMC/total?style=for-the-badge" alt="Downloads" /></a>
+  <a href="https://github.com/siberanka/TrafficerMC/releases/tag/v4.0.0"><img src="https://img.shields.io/badge/release-v4.0.0-14b8a6?style=for-the-badge&logo=github&logoColor=white" alt="TrafficerMC release v4.0.0" /></a>
+  <a href="https://github.com/siberanka/TrafficerMC/releases/download/v4.0.0/TrafficerMC.4.0.0.exe"><img src="https://img.shields.io/badge/Windows-x64%20portable-2563eb?style=for-the-badge&logo=windows11&logoColor=white" alt="Windows x64 portable download" /></a>
+  <a href="https://github.com/siberanka/TrafficerMC/releases/tag/v4.0.0"><img src="https://img.shields.io/github/downloads/siberanka/TrafficerMC/v4.0.0/total?style=for-the-badge&label=4.0%20downloads&color=0ea5e9" alt="TrafficerMC 4.0 downloads" /></a>
+  <a href="https://github.com/siberanka/TrafficerMC/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-64748b?style=for-the-badge" alt="MIT license" /></a>
 </p>
 
 > [!WARNING]
