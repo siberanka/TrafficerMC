@@ -212,6 +212,27 @@ body {
   flex: 1;
 }
 
+.rejoin-delay-field {
+  align-items: stretch;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rejoin-delay-field > .text-sm {
+  min-width: 0;
+}
+
+.rejoin-delay-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.rejoin-delay-inputs input {
+  min-width: 0;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Form Controls (Inputs, Selects, Buttons)                                   */
 /* -------------------------------------------------------------------------- */

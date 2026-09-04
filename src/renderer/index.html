@@ -84,9 +84,9 @@
                   </label>
                 </div>
 
-                <div class="ui-field">
+                <div class="ui-field rejoin-delay-field">
                   <span class="text-sm">Rejoin delay (random ms):</span>
-                  <div class="flex" style="gap: 8px; width: 100%">
+                  <div class="rejoin-delay-inputs">
                     <input
                       id="reconnectDelayMin"
                       type="number"
@@ -94,6 +94,7 @@
                       max="300000"
                       step="500"
                       placeholder="Min 8000"
+                      aria-label="Minimum rejoin delay in milliseconds"
                       title="Minimum reconnect delay in milliseconds"
                     />
                     <input
@@ -103,6 +104,7 @@
                       max="300000"
                       step="500"
                       placeholder="Max 15000"
+                      aria-label="Maximum rejoin delay in milliseconds"
                       title="Maximum reconnect delay in milliseconds"
                     />
                   </div>

@@ -17,6 +17,9 @@ The package and release version remains 3.6.0 while stabilization is in progress
 - Removed the process-wide TLS certificate-verification bypass.
 - Restricted release packaging to compiled application files and production dependencies so local test worlds, server binaries, databases, logs, and credentials cannot enter public artifacts.
 - Fixed packaged Windows builds remaining invisible because the generated `preload/index.mjs` was referenced as `preload/index.js`; window startup now has a `ready-to-show` fallback and packaged tests require a real visible HWND.
+- Fixed saved settings appearing empty in packaged builds: the incompatible preload helper was replaced with an Electron 28-compatible, allowlisted IPC bridge, and configuration loading now uses a race-free request/response path.
+- Added idempotent schema-v2 migration for legacy, flat, aliased, and partially malformed settings; existing and unknown fields are preserved and a one-time pre-migration backup is written before conversion.
+- Reworked the main-page rejoin-delay layout so its label and random min/max inputs no longer overlap or consume adjacent fields.
 
 ### Verified locally
 
@@ -25,3 +28,4 @@ The package and release version remains 3.6.0 while stabilization is in progress
 - Velocity 4.1.1 build 24: real proxy command routing from the local auth backend to the local lobby backend, re-authentication, and retained play state.
 - Full unit/integration suite and Electron production build (see the corresponding commit verification output).
 - Windows x64 `win-unpacked` and portable packages both launched with a real visible HWND and no preload error; the archive audit found no `test/`, `test-server/`, server jar, world, database, log, or local fixture content in `app.asar`.
+- Packaged Electron UI migration test restored legacy values and checkboxes, verified all 64 applicable controls against the existing local profile, and measured a non-overlapping rejoin-delay layout.

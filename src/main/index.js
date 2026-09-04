@@ -26,16 +26,14 @@ import { antiafk } from './js/misc/antiafk'
 import { autoAuth } from './js/misc/autoAuth'
 import { resolveBotVersion, isVersionSupported } from './js/misc/versionResolver'
 import { sendBotMessage, getNextMessage } from './js/misc/spammerEngine'
-import {
-  DEFAULT_REJOIN_DELAY_MIN,
-  DEFAULT_REJOIN_DELAY_MAX,
-  getRandomRejoinDelay,
-  normalizeRejoinRange
-} from './js/misc/reconnectPolicy'
+import { getRandomRejoinDelay } from './js/misc/reconnectPolicy'
+import { CURRENT_CONFIG_SCHEMA_VERSION, migrateConfigData } from './js/misc/configMigration'
 import { consoleManager } from './js/misc/consoleStreamer'
 const botApi = new EventEmitter()
 botApi.setMaxListeners(0)
-const store = new Store()
+// Tests can isolate persistent data without touching the user's profile. This
+// is intentionally opt-in and does not change the default Electron userData path.
+const store = new Store({ cwd: process.env.TRAFFICER_TEST_CONFIG_DIR })
 
 let cachedConfig = store.get('config') || { value: {}, boolean: {} }
 let saveConfigTimeout = null
@@ -170,10 +168,6 @@ function createMainWindow() {
     store.set('version', {
       current: clientVersion
     })
-    mainWindow.webContents.send('setConfig', store.get('config'), store.get('version'))
-    if (!storeinfo()) {
-      mainWindow.webContents.send('initConfig')
-    }
     if (store.get('config.namefile')) {
       mainWindow.webContents.send('fileSelected', 'nameFileLabel', store.get('config.namefile'))
     }
@@ -241,104 +235,26 @@ function cleanOldTempDirs() {
 
 function migrateConfig() {
   try {
-    const config = store.get('config') || {}
-    let updated = false
-    if (!config.value) config.value = {}
-    if (!config.boolean) config.boolean = {}
-
-    if (config.boolean.autoAuth === undefined) {
-      config.boolean.autoAuth = false
-      updated = true
-    }
-    if (!config.value.authPassword) {
-      config.value.authPassword = 'trafficermc123a'
-      updated = true
-    }
-    if (!config.value.proxySource) {
-      config.value.proxySource = 'all'
-      updated = true
-    }
-    if (!config.value.proxyAnonymity) {
-      config.value.proxyAnonymity = 'all'
-      updated = true
-    }
-
-    const legacyDefaults = [
-      'daha kaliteli bi oyun deneyimi',
-      'simit parasına açılmış sunuculardan sıkıldın mı?',
-      'laglı sunuculardan sıkıldın mı?'
-    ]
-
-    if (!config.value.spammerMessages || !Array.isArray(config.value.spammerMessages)) {
-      config.value.spammerMessages = []
-      updated = true
-    } else {
-      const isLegacyDefault =
-        config.value.spammerMessages.length === 3 &&
-        config.value.spammerMessages.every((m, idx) => m === legacyDefaults[idx])
-      if (isLegacyDefault) {
-        config.value.spammerMessages = []
-        updated = true
+    const rawConfig = store.get('config')
+    const migration = migrateConfigData(rawConfig)
+    if (migration.changed && rawConfig) {
+      const backupPath = join(
+        app.getPath('userData'),
+        `config.before-schema-v${CURRENT_CONFIG_SCHEMA_VERSION}.backup.json`
+      )
+      if (!fs.existsSync(backupPath)) {
+        fs.writeFileSync(
+          backupPath,
+          JSON.stringify({ createdAt: new Date().toISOString(), config: rawConfig }, null, 2),
+          { encoding: 'utf8', flag: 'wx' }
+        )
       }
     }
-
-    if (!config.value.spammerPattern) {
-      config.value.spammerPattern = 'random'
-      updated = true
-    }
-    if (!config.value.messageConverter) {
-      config.value.messageConverter = 'none'
-      updated = true
-    }
-    if (!config.value.formatterPosition) {
-      config.value.formatterPosition = 'suffix'
-      updated = true
-    }
-    if (config.boolean.customFormatter === undefined) {
-      config.boolean.customFormatter = true
-      updated = true
-    }
-    if (!config.value.spammerDelayMin) {
-      config.value.spammerDelayMin = 1500
-      updated = true
-    }
-    if (!config.value.spammerDelayMax) {
-      config.value.spammerDelayMax = 3000
-      updated = true
-    }
-    if (!config.value.spammerMps) {
-      config.value.spammerMps = 1
-      updated = true
-    }
-    const legacyReconnectDelay = Number(config.value.reconnectDelay)
-    if (config.value.reconnectDelayMin === undefined) {
-      config.value.reconnectDelayMin =
-        Number.isFinite(legacyReconnectDelay) && legacyReconnectDelay >= 3000
-          ? Math.round(legacyReconnectDelay)
-          : DEFAULT_REJOIN_DELAY_MIN
-      updated = true
-    }
-    if (config.value.reconnectDelayMax === undefined) {
-      config.value.reconnectDelayMax =
-        Number.isFinite(legacyReconnectDelay) && legacyReconnectDelay >= 3000
-          ? Math.max(config.value.reconnectDelayMin, Math.round(legacyReconnectDelay * 1.5))
-          : DEFAULT_REJOIN_DELAY_MAX
-      updated = true
-    }
-    const normalizedRejoin = normalizeRejoinRange(config.value)
-    if (
-      config.value.reconnectDelayMin !== normalizedRejoin.min ||
-      config.value.reconnectDelayMax !== normalizedRejoin.max
-    ) {
-      config.value.reconnectDelayMin = normalizedRejoin.min
-      config.value.reconnectDelayMax = normalizedRejoin.max
-      updated = true
-    }
-    if (updated) {
-      store.set('config', config)
-    }
-    cachedConfig = config
-  } catch (_) {}
+    if (migration.changed) store.set('config', migration.config)
+    cachedConfig = migration.config
+  } catch (error) {
+    console.error('[Config] Migration failed; the original configuration was not modified.', error)
+  }
 }
 
 function startSpammerLoop() {
@@ -451,6 +367,11 @@ ipcMain.on('setConfig', (event, type, id, value) => {
   cachedConfig[type][id] = value
   debouncedStoreSave()
 })
+
+ipcMain.handle('config:get', () => ({
+  config: cachedConfig,
+  version: { current: clientVersion }
+}))
 
 ipcMain.on('deleteConfig', () => {
   cachedConfig = { value: {}, boolean: {} }

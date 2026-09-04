@@ -23,7 +23,10 @@ console.log('✓ Spammer engine handles empty/null messages array safely')
 
 // Test 2: Verify zero hardcoded promo spammer messages in src
 console.log('--- Test 2: Verify default spammer messages removed from source files ---')
-const mainIndexSrc = fs.readFileSync(path.resolve('src/main/index.js'), 'utf-8')
+const configMigrationSrc = fs.readFileSync(
+  path.resolve('src/main/js/misc/configMigration.js'),
+  'utf-8'
+)
 const rendererIndexSrc = fs.readFileSync(path.resolve('src/renderer/src/index.js'), 'utf-8')
 
 assert.ok(
@@ -31,8 +34,8 @@ assert.ok(
   'Renderer must initialize spammerMessages as empty array []'
 )
 assert.ok(
-  mainIndexSrc.includes('config.value.spammerMessages = []'),
-  'Main migrateConfig must initialize spammerMessages as empty array []'
+  configMigrationSrc.includes('values.spammerMessages = []'),
+  'Config migration must initialize spammerMessages as empty array []'
 )
 assert.ok(
   !rendererIndexSrc.includes('daha kaliteli bi oyun deneyimi'),

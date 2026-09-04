@@ -1,7 +1,5 @@
 window.addEventListener('DOMContentLoaded', () => {
-  window.electron?.ipcRenderer.send('loaded')
-
-  window.electron?.ipcRenderer.on('setConfig', (event, config, version) => {
+  const applyStoredConfig = (config, version) => {
     setConfigValues(config)
     fetch('https://raw.githubusercontent.com/RattlesHyper/TrafficerMC/main/VERSION', {
       method: 'GET'
@@ -15,7 +13,19 @@ window.addEventListener('DOMContentLoaded', () => {
         }
       })
     document.getElementById('versionString').textContent = `v${version.current}`
+  }
+
+  // Keep the event listener for older main-process builds, but request the
+  // configuration only after handlers exist so a fast packaged build cannot
+  // deliver it before the renderer is listening.
+  window.electron?.ipcRenderer.on('setConfig', (event, config, version) => {
+    applyStoredConfig(config, version)
   })
+  window.electron?.ipcRenderer
+    .invoke('config:get')
+    .then(({ config, version }) => applyStoredConfig(config, version))
+    .catch((error) => console.error('[Config] Unable to load saved settings.', error))
+  window.electron?.ipcRenderer.send('loaded')
 
   window.electron?.ipcRenderer.on('fileSelected', (event, id, path) => {
     const filename = path.match(/[^\\]+$/)[0]
@@ -464,8 +474,11 @@ function checkUsername() {
 }
 
 function setConfigValues(obj) {
-  for (const keyType in obj) {
-    const keys = Object.keys(obj[keyType])
+  if (!obj || typeof obj !== 'object') return
+  for (const keyType of ['value', 'boolean']) {
+    const entries = obj[keyType]
+    if (!entries || typeof entries !== 'object') continue
+    const keys = Object.keys(entries)
     for (const key of keys) {
       const element = document.getElementById(key)
       if (element) {
