@@ -1,5 +1,5 @@
 /* eslint-disable no-case-declarations */
-import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog, net } from 'electron'
 import { join } from 'path'
 import os from 'os'
 import crypto from 'crypto'
@@ -28,6 +28,7 @@ import { resolveBotVersion, isVersionSupported } from './js/misc/versionResolver
 import { sendBotMessage, getNextMessage } from './js/misc/spammerEngine'
 import { getRandomRejoinDelay } from './js/misc/reconnectPolicy'
 import { CURRENT_CONFIG_SCHEMA_VERSION, migrateConfigData } from './js/misc/configMigration'
+import { getLatestGitHubRelease } from '../shared/releaseVersion'
 import { consoleManager } from './js/misc/consoleStreamer'
 const botApi = new EventEmitter()
 botApi.setMaxListeners(0)
@@ -63,7 +64,7 @@ function clearRejoinTimers() {
   rejoinTimers.clear()
 }
 
-let clientVersion = 3.6
+const clientVersion = app.getVersion()
 
 let playerList = []
 let playerListSet = new Set()
@@ -144,10 +145,10 @@ let spammerState = { index: 0 }
 
 function createMainWindow() {
   const mainWindow = new BrowserWindow({
-    width: 1040,
-    height: 640,
-    minWidth: 980,
-    minHeight: 580,
+    width: 1240,
+    height: 780,
+    minWidth: 1040,
+    minHeight: 640,
     show: false,
     autoHideMenuBar: true,
     frame: false,
@@ -372,6 +373,11 @@ ipcMain.handle('config:get', () => ({
   config: cachedConfig,
   version: { current: clientVersion }
 }))
+
+ipcMain.handle('version:getLatest', () => {
+  if (process.env.TRAFFICER_README_PREVIEW === '1') return null
+  return getLatestGitHubRelease((url, options) => net.fetch(url, options))
+})
 
 ipcMain.on('deleteConfig', () => {
   cachedConfig = { value: {}, boolean: {} }

@@ -23,7 +23,7 @@ const receiveChannels = new Set([
   'proxyEvent',
   'botEvent'
 ])
-const invokeChannels = new Set(['config:get'])
+const invokeChannels = new Set(['config:get', 'version:getLatest'])
 
 function assertChannel(allowedChannels, channel) {
   if (!allowedChannels.has(channel)) throw new Error(`Blocked IPC channel: ${channel}`)

@@ -1,5 +1,22 @@
 # Changelog
 
+## 4.0.0 — 2026-09-04
+
+- Introduced a restrained premium desktop workspace with stronger information hierarchy, dedicated page headers, consistent navigation states, and more legible controls.
+- Replaced decorative Unicode navigation symbols with locally embedded Lucide/Feather line-icon paths and included their ISC/MIT notices in source and packaged distributions.
+- Increased the default desktop canvas for dense testing workflows while retaining a responsive minimum size and bounded rendering behavior.
+- Added privacy-safe README preview generation from an isolated empty profile; generated images clear all entries, selections, checkboxes, logs, and notifications before capture.
+- Moved update discovery to the official `siberanka/TrafficerMC` GitHub Releases feed, added strict newer-only semantic version comparison, and suppressed update notices in documentation previews.
+- Promoted the persisted-settings recovery, schema-v2 migration, Electron 28-compatible preload bridge, and rejoin-delay layout correction from the 3.6 stabilization line.
+
+### Verified locally
+
+- Existing local profile retained every pre-migration field and restored all 64 applicable UI controls.
+- General, Botting, Scripting, Proxy, About, and Settings fit the 1240×780 default and 1040×640 minimum window matrices without horizontal document, pane, card, control, or modal overflow; longer pages remain fully reachable by bounded scrolling.
+- Empty-profile UI previews and packaged migration tests run without accessing the user's real configuration.
+- Live local Paper/AuthMe and Velocity/two-backend fixtures passed authentication, chat, command, transfer, re-authentication, and retained-play-state checks.
+- Full unit, integration, packaged Electron, and Windows portable checks pass on the release build.
+
 ## 3.6.0 development updates — 2026-09-04
 
 The package and release version remains 3.6.0 while stabilization is in progress.

@@ -51,8 +51,11 @@ console.log('--- Testing Proxy Scraper & HTTP Tunnel Mechanics ---')
 {
   const PROXY_PORT = 19188
   const DEST_PORT = 19189
+  const tunnelSockets = new Set()
 
   const mockDestServer = net.createServer((socket) => {
+    tunnelSockets.add(socket)
+    socket.once('close', () => tunnelSockets.delete(socket))
     socket.on('error', () => {})
     socket.on('data', (data) => {
       if (data.toString() === 'HELLO_DEST') {
@@ -63,6 +66,8 @@ console.log('--- Testing Proxy Scraper & HTTP Tunnel Mechanics ---')
 
   const mockHttpProxy = http.createServer()
   mockHttpProxy.on('connect', (req, clientSocket, head) => {
+    tunnelSockets.add(clientSocket)
+    clientSocket.once('close', () => tunnelSockets.delete(clientSocket))
     const [host, port] = req.url.split(':')
     const destSocket = net.connect(parseInt(port), host, () => {
       clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n')
@@ -70,38 +75,47 @@ console.log('--- Testing Proxy Scraper & HTTP Tunnel Mechanics ---')
       destSocket.pipe(clientSocket)
       clientSocket.pipe(destSocket)
     })
+    tunnelSockets.add(destSocket)
+    destSocket.once('close', () => tunnelSockets.delete(destSocket))
     destSocket.on('error', () => clientSocket.destroy())
     clientSocket.on('error', () => destSocket.destroy())
   })
 
-  mockDestServer.listen(DEST_PORT, '127.0.0.1', () => {
-    mockHttpProxy.listen(PROXY_PORT, '127.0.0.1', async () => {
-      try {
-        const tunnelSocket = await connection(
-          'http',
-          '127.0.0.1',
-          PROXY_PORT,
-          null,
-          null,
-          '127.0.0.1',
-          DEST_PORT
-        )
-
-        tunnelSocket.write('HELLO_DEST')
-        tunnelSocket.once('data', (chunk) => {
-          assert.strictEqual(chunk.toString(), 'DEST_RESPONSE_OK')
-          console.log('✓ HTTP CONNECT tunnel communication verified')
-          tunnelSocket.destroy()
-          mockHttpProxy.close()
-          mockDestServer.close()
-        })
-      } catch (err) {
-        mockHttpProxy.close()
-        mockDestServer.close()
-        assert.fail(`HTTP CONNECT tunnel failed: ${err.message}`)
-      }
+  try {
+    await new Promise((resolve, reject) => {
+      mockDestServer.once('error', reject)
+      mockDestServer.listen(DEST_PORT, '127.0.0.1', resolve)
     })
-  })
+    await new Promise((resolve, reject) => {
+      mockHttpProxy.once('error', reject)
+      mockHttpProxy.listen(PROXY_PORT, '127.0.0.1', resolve)
+    })
+
+    const tunnelSocket = await connection(
+      'http',
+      '127.0.0.1',
+      PROXY_PORT,
+      null,
+      null,
+      '127.0.0.1',
+      DEST_PORT
+    )
+    tunnelSockets.add(tunnelSocket)
+    tunnelSocket.once('close', () => tunnelSockets.delete(tunnelSocket))
+    const response = new Promise((resolve, reject) => {
+      tunnelSocket.once('data', resolve)
+      tunnelSocket.once('error', reject)
+    })
+    tunnelSocket.write('HELLO_DEST')
+    assert.strictEqual((await response).toString(), 'DEST_RESPONSE_OK')
+    console.log('✓ HTTP CONNECT tunnel communication verified')
+  } finally {
+    for (const socket of tunnelSockets) socket.destroy()
+    await Promise.all([
+      new Promise((resolve) => mockHttpProxy.close(resolve)),
+      new Promise((resolve) => mockDestServer.close(resolve))
+    ])
+  }
 }
 
 // 4. Test scraper against an isolated local source. Public proxy lists are

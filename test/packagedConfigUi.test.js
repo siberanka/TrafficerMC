@@ -192,13 +192,97 @@ try {
     assert.equal(state.reconnectDelayMax, '18750')
     assert.equal(stored.config.value.spammerDelayMin, 2100)
   }
+
+  for (const viewport of [
+    { width: 1240, height: 780 },
+    { width: 1040, height: 640 }
+  ]) {
+    await page.setViewport({ ...viewport, deviceScaleFactor: 1 })
+    for (const target of ['general', 'botting', 'scripting', 'proxy', 'about']) {
+      await page.evaluate((tabTarget) => {
+        document.querySelector(`.sidebar .tab[data-target="${tabTarget}"]`)?.click()
+        document.querySelector('.controlArea').scrollTop = 0
+      }, target)
+      await new Promise((resolve) => setTimeout(resolve, 75))
+      const layout = await page.evaluate((tabTarget) => {
+        const control = document.querySelector('.controlArea')
+        const pane = document.getElementById(tabTarget)
+        const controlRect = control.getBoundingClientRect()
+        const paneRect = pane.getBoundingClientRect()
+        const visibleCards = [...pane.querySelectorAll('.ui-card')].filter(
+          (card) => getComputedStyle(card).display !== 'none' && card.getClientRects().length > 0
+        )
+        const visibleControls = [
+          ...pane.querySelectorAll('input, select, textarea, button, a')
+        ].filter(
+          (element) =>
+            getComputedStyle(element).display !== 'none' && element.getClientRects().length > 0
+        )
+        control.scrollTop = control.scrollHeight
+        return {
+          documentOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+          controlOverflow: control.scrollWidth > control.clientWidth + 1,
+          paneOverflow:
+            paneRect.left < controlRect.left - 1 || paneRect.right > controlRect.right + 1,
+          overflowingCards: visibleCards.filter((card) => {
+            const rect = card.getBoundingClientRect()
+            return rect.left < controlRect.left - 1 || rect.right > controlRect.right + 1
+          }).length,
+          overflowingControls: visibleControls.filter((element) => {
+            const rect = element.getBoundingClientRect()
+            return rect.left < controlRect.left - 1 || rect.right > controlRect.right + 1
+          }).length,
+          bottomReachable:
+            Math.abs(control.scrollTop + control.clientHeight - control.scrollHeight) <= 2
+        }
+      }, target)
+      assert.deepEqual(
+        layout,
+        {
+          documentOverflow: false,
+          controlOverflow: false,
+          paneOverflow: false,
+          overflowingCards: 0,
+          overflowingControls: 0,
+          bottomReachable: true
+        },
+        `${target} layout must fit ${viewport.width}x${viewport.height}`
+      )
+    }
+
+    const settingsLayout = await page.evaluate(() => {
+      document.getElementById('openSettings').click()
+      const modal = document.querySelector('.settings-tab-content')
+      const rect = modal.getBoundingClientRect()
+      return {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
+        scrollableIfNeeded: modal.scrollHeight <= modal.clientHeight || modal.clientHeight > 0
+      }
+    })
+    assert.ok(
+      settingsLayout.left >= 0 && settingsLayout.top >= 0,
+      'settings must start in viewport'
+    )
+    assert.ok(
+      settingsLayout.right <= settingsLayout.viewportWidth + 1 &&
+        settingsLayout.bottom <= settingsLayout.viewportHeight + 1,
+      `settings layout must fit ${viewport.width}x${viewport.height}`
+    )
+    assert.equal(settingsLayout.scrollableIfNeeded, true)
+    await page.evaluate(() => document.getElementById('closeSettings').click())
+  }
   if (process.env.TRAFFICER_UI_SCREENSHOT) {
     const screenshotPath = path.resolve(process.env.TRAFFICER_UI_SCREENSHOT)
     fs.mkdirSync(path.dirname(screenshotPath), { recursive: true })
     await page.screenshot({ path: screenshotPath })
   }
   console.log(
-    `PASS: ${matchedControls} saved controls restored, legacy data migrated, and rejoin layout is clear`
+    `PASS: ${matchedControls} saved controls restored; migration, rejoin layout, and 1240x780/1040x640 viewport matrices passed`
   )
 } finally {
   browser?.disconnect()

@@ -1,17 +1,28 @@
+import { isNewerRelease } from '../../shared/releaseVersion.js'
+
 window.addEventListener('DOMContentLoaded', () => {
-  const applyStoredConfig = (config, version) => {
-    setConfigValues(config)
-    fetch('https://raw.githubusercontent.com/RattlesHyper/TrafficerMC/main/VERSION', {
-      method: 'GET'
-    })
-      .then((response) => response.text())
-      .then((result) => {
-        const liveVersion = parseFloat(result)
-        const currentVersion = version.current
-        if (currentVersion != liveVersion) {
-          notify('Warning', 'New version available. Please update your client', 'warning')
+  let versionCheckStarted = false
+
+  const checkForUpdates = (currentVersion) => {
+    if (versionCheckStarted) return
+    versionCheckStarted = true
+    window.electron?.ipcRenderer
+      .invoke('version:getLatest')
+      .then((latestVersion) => {
+        if (latestVersion && isNewerRelease(latestVersion, currentVersion)) {
+          notify(
+            'Update available',
+            `TrafficerMC ${latestVersion} is available on GitHub.`,
+            'warning'
+          )
         }
       })
+      .catch(() => {})
+  }
+
+  const applyStoredConfig = (config, version) => {
+    setConfigValues(config)
+    checkForUpdates(version.current)
     document.getElementById('versionString').textContent = `v${version.current}`
   }
 
@@ -444,8 +455,9 @@ function checkboxClick(event) {
 }
 
 function navClick(event) {
-  const classes = event.target.classList
-  const navName = event.target.innerText.toLowerCase()
+  const navElement = event.currentTarget
+  const classes = navElement.classList
+  const navName = navElement.dataset.target || navElement.innerText.toLowerCase()
   const tabContent = document.getElementsByClassName(classes[1])
 
   Array.from(tabContent).forEach((content) => {
@@ -462,7 +474,7 @@ function navClick(event) {
     tab.classList.remove('selected')
   })
 
-  event.currentTarget.classList.add('selected')
+  navElement.classList.add('selected')
 }
 
 function checkUsername() {

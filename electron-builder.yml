@@ -8,6 +8,7 @@ files:
   # credentials therefore cannot leak into a public artifact.
   - out/**/*
   - package.json
+  - THIRD_PARTY_LICENSES.md
 asarUnpack:
   - resources/**
 win:

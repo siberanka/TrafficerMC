@@ -16,9 +16,9 @@
 
 TrafficerMC helps server owners reproduce client, authentication, proxy, chat, command, inventory, and automation behavior in controlled Minecraft test environments. Start with one client, keep conservative delays, monitor the server, and stop immediately if the target becomes unhealthy.
 
-## Current development status
+## Current release
 
-Version remains **3.6.0** while stabilization continues. The update log for the current 3.6.0 development line is maintained in [CHANGELOG.md](CHANGELOG.md); these fixes do not claim a new stable release.
+Version **4.0.0** introduces the redesigned desktop workspace, reliable persisted-settings migration, and the stabilized client/network mechanics developed throughout the 3.6 line. See [CHANGELOG.md](CHANGELOG.md) for the complete verification record.
 
 Native protocol support follows the installed Mineflayer/minecraft-protocol stack: **1.7 through 26.1**, with protocol-equivalent patch aliases such as 1.21.7 → 1.21.8 and 1.21.10 → 1.21.9. Minecraft 26.2 uses a different protocol and is not silently downgraded to 26.1. Use it only after the upstream stack adds native support; a ViaVersion bridge may connect but is not considered full compatibility.
 
@@ -32,6 +32,7 @@ Native protocol support follows the installed Mineflayer/minecraft-protocol stac
 - HTTP CONNECT and SOCKS proxy support and isolated proxy checking.
 - Anti-AFK, inventory/hotbar controls, movement, scripting, and multi-client management.
 - Bounded, frame-batched UI logs to avoid unbounded DOM growth and long rendering frames.
+- Premium desktop workspace with clearer hierarchy, compact status feedback, and privacy-safe documentation previews.
 
 Authentication prompts are server-configurable, so compatibility means the standard command/form flows covered by the test matrix. Captcha, TOTP, recovery codes, custom PIN keyboards, and server-specific challenges intentionally require an explicit integration.
 
@@ -71,11 +72,21 @@ npm run dev
 
 Packaging is available through `npm run build:win`, `npm run build:linux`, `npm run build:mac`, or `npm run build:unpack`. CI/CD is not required to run or validate the project.
 
-## Screenshots
+## Interface preview
 
-| General                                 | Botting                                 | Proxy                               |
-| --------------------------------------- | --------------------------------------- | ----------------------------------- |
-| ![General tab](docs/images/general.png) | ![Botting tab](docs/images/botting.png) | ![Proxy tab](docs/images/proxy.png) |
+All previews are generated from an isolated empty profile. No local server address, username, password, proxy, script, or saved setting is included.
+
+| Connection workspace                    | Client command deck                     |
+| --------------------------------------- | --------------------------------------- |
+| ![General tab](docs/images/general.png) | ![Botting tab](docs/images/botting.png) |
+
+| Automation studio                           | Proxy validation                    |
+| ------------------------------------------- | ----------------------------------- |
+| ![Scripting tab](docs/images/scripting.png) | ![Proxy tab](docs/images/proxy.png) |
+
+| Preferences                                  |
+| -------------------------------------------- |
+| ![Settings dialog](docs/images/settings.png) |
 
 ## License and attribution
 
