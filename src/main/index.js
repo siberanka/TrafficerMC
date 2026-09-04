@@ -40,19 +40,21 @@ function storeinfo() {
   return store.get('config')
 }
 
-let clientVersion = 3.5
+let clientVersion = 3.6
 
 let playerList = []
 
 function createMainWindow() {
   const mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 500,
+    width: 1040,
+    height: 640,
+    minWidth: 980,
+    minHeight: 580,
     show: false,
     autoHideMenuBar: true,
     frame: false,
-    resizable: is.dev,
-    maximizable: is.dev,
+    resizable: true,
+    maximizable: true,
     webPreferences: {
       devTools: is.dev,
       preload: join(__dirname, '../preload/index.js'),

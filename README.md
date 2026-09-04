@@ -1,65 +1,123 @@
 <p align="center">
-  <img src="https://github.com/RattlesHyper/TrafficerMC/assets/83329088/28ffc234-65f7-4847-a0ad-1df8a52a368d"/>
+  <img src="./src/renderer/assets/icons/icon.png" width="96" height="96" alt="TrafficerMC Logo" />
 </p>
-<p align="center"><b style="font-size: 30px">⚠️ This version of the program is no longer actively maintained.</b></p>
+
+<h1 align="center">TrafficerMC</h1>
+
 <p align="center">
-<a href="https://github.com/RattlesHyper/TrafficerMC/releases/latest">
-  <img src="https://img.shields.io/github/v/release/RattlesHyper/Trafficermc?color=red&style=for-the-badge"/>
-</a>
-  <a href="https://github.com/RattlesHyper/TrafficerMC/releases">
-  <img src="https://img.shields.io/github/downloads/RattlesHyper/TrafficerMC/total?color=red&style=for-the-badge"/>
-    <a href="https://discord.gg/uFpaAZdVgS"><img src="https://img.shields.io/discord/935341227400904734?label=DISCORD&color=red&style=for-the-badge"></a>
+  <b>High-Performance Minecraft Botting, Stress Testing & Proxy Tool</b>
+</p>
+
+<p align="center">
+  <a href="https://github.com/siberanka/TrafficerMC/releases/latest">
+    <img src="https://img.shields.io/github/v/release/siberanka/TrafficerMC?color=0ea5e9&style=for-the-badge" alt="Latest Release" />
+  </a>
+  <a href="https://github.com/siberanka/TrafficerMC/releases">
+    <img src="https://img.shields.io/github/downloads/siberanka/TrafficerMC/total?color=0ea5e9&style=for-the-badge" alt="Total Downloads" />
+  </a>
+  <a href="https://discord.gg/uFpaAZdVgS">
+    <img src="https://img.shields.io/discord/935341227400904734?label=DISCORD&color=5865F2&style=for-the-badge" alt="Discord" />
   </a>
 </p>
 
+---
 
-## Features
-TrafficerMC has a variety of features. Some of them are:
- - Anti AFK
- - Spam with Bypass
- - Name Generator
- - Full Inventory Control
- - Movement Control
- - EasyMC Support
- - Auto Reconnect
- - Killaura
- - [Scripting](#scripting)
- - [Proxies](#proxies)
- - and way more!
+## 🌟 Key Features
 
-#### Minecraft Version 1.8.x - 1.20
+TrafficerMC is a modern, modular, and high-performance Minecraft client orchestration tool:
 
-##### Check out [Build Guide](#build-guide) to build TrafficerMC for your machine.
+- 🔐 **AuthMe Reloaded 6.0+ Auto-Auth**: Automatic pre-login and in-game authentication handling `/register` and `/login` via chat commands, modern dialog packets (`open_dialog`), titles, and actionbars. Default password: `trafficermc123a`.
+- 🌐 **Live Multi-Source Proxy Scraper**: Download thousands of live HTTP/SOCKS5 proxies with a single click from ProxyScrape API v4/v2, popular GitHub repositories, Geonode API, and custom user-defined Raw URLs.
+- 🛡️ **Anonymity Level Filtering**: Filter scraped proxies by anonymity (`Elite`, `Anonymous`, `Transparent`, `All`).
+- ⚡ **HTTP CONNECT & SOCKS5 Tunneling**: Full proxy authentication and socket tunneling support with latency and timeout checkers.
+- 🎮 **Extended Minecraft Version Support**: Supports all protocol versions from **1.8.x up to 26.2** (including 1.21.11, 26.0, 26.1, 26.2).
+- 🎨 **Modern, Sleek & Fluid UI**: Fluid, card-based dark theme (`#0d1117`) layout with expanded 1040x640 dimensions, eliminating cluttered inline styles, noisy tiled backgrounds, and legacy blur effects.
+- 📦 **Zero-Install Portable Executable**: Standalone Windows executable (`TrafficerMC 3.6.0.exe`) available directly from GitHub Releases.
+- 🤖 **Comprehensive Botting Controls**:
+  - Multi-bot management & auto-selection
+  - Anti-AFK module
+  - Chat spammer with delay & bypass modes
+  - Hotbar & Inventory window manager
+  - Directional movement & look control
+  - KillAura with target filters (Players, Vehicles, Mobs, Animals)
+  - Custom script runner (`scripting`)
+  - Discord webhook integration
 
-## Media
+---
 
-![TrafficerMC v3.0](https://github.com/RattlesHyper/TrafficerMC/assets/83329088/f0d90bb4-ca3b-4a7c-acdc-b851e386d632)
-**TrafficerMC v3.0**
+## 📸 Screenshots (v3.6.0 Modern UI)
 
-![Settings](https://github.com/RattlesHyper/TrafficerMC/assets/83329088/b1b103f1-1720-46fc-91ae-22e4ac186227)
-**Settings**
+### General Tab (Connection & Configuration)
+![General Tab](docs/images/general.png)
 
-![Botting](https://github.com/RattlesHyper/TrafficerMC/assets/83329088/b1951a59-7c90-40a9-b273-1b0feab52d92)
-**Botting**
+### Botting Tab (Controls & Chat)
+![Botting Tab](docs/images/botting.png)
 
-![Scripting](https://github.com/RattlesHyper/TrafficerMC/assets/83329088/2a25acd9-0c63-4042-8f11-68179aec0baa)
-**Scripting**
+### Proxy Tab (Live Scraper & Tester)
+![Proxy Tab](docs/images/proxy.png)
 
-![Proxy](https://github.com/RattlesHyper/TrafficerMC/assets/83329088/36f7cf6d-80e3-4d63-bb4f-ed23e8df8df1)
-**Proxy**
+### Scripting Tab (Automation & Actions)
+![Scripting Tab](docs/images/scripting.png)
 
-## Tutorials
-[![](https://img.youtube.com/vi/lD3poymjVAk/maxresdefault.jpg)](https://www.youtube.com/watch?v=lD3poymjVAk)
-TrafficerMC v2.1 Tutorial Video
+### Settings Modal (Preferences & Delays)
+![Settings Modal](docs/images/settings.png)
 
-[![](https://img.youtube.com/vi/eAe9m-d-el0/maxresdefault.jpg)](https://www.youtube.com/watch?v=eAe9m-d-el0)
-TrafficerMC v0.4 Preview Video (Outdated)
+---
 
-# Scripting
-Scripting can allow the bot to do things automatically without any user input. It can also help if you are making multiple bots do the same things. All script executions will be shown on manual inputs, it can be used in scripting.
+## 🚀 Quick Start & Download
 
-## What a script would look like
+### Download Executable
+Directly download the latest portable Windows executable from the Releases page:
+👉 **[Download TrafficerMC Latest Release](https://github.com/siberanka/TrafficerMC/releases/latest)**
+
+Simply run `TrafficerMC.exe` — no installer or Node.js runtime required.
+
+---
+
+## 🛠️ Building from Source
+
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- Git
+
+### Installation & Run
+```bash
+# Clone the repository
+git clone https://github.com/siberanka/TrafficerMC.git
+cd TrafficerMC
+
+# Install dependencies
+npm install
+
+# Run automated tests
+npm test
+
+# Run development mode
+npm run dev
 ```
+
+### Packaging Executable
+```bash
+# Windows Portable .exe
+npm run build:win
+
+# Unpacked directory for inspection
+npm run build:unpack
+
+# Linux
+npm run build:linux
+
+# macOS
+npm run build:mac
+```
+
+---
+
+## 📜 Scripting Syntax
+
+The built-in scripting engine enables multi-action automation sequences:
+
+```text
 chat Hello from TrafficerMC!
 delay 1000
 useheld
@@ -68,142 +126,23 @@ winclick 36 0
 delay 1000
 disconnect
 ```
-## Features
- - [Chat](#chat)
- - [Use Held Item](#useheld)
- - [Set Hotbar Slot](#sethotbar)
- - [Click Inventory Item](#winclick)
- - [Close Window](#closewindow)
- - [Drop](#drop)
- - [Movement](#movement)
- - [Anti-AFK](#anti-afk)
- - [Disconnect](#disconnect)
- - [Reconnect](#reconnect)
- - [Loop](#startscript)
- - [Delay](#delay)
 
-### Chat
-Sends a message to the servers chat.
-Usage: `chat <message>`
+### Supported Commands
+- `chat <message>`: Send server chat (supports `{player}` and `{random}`)
+- `delay <ms>`: Pause execution for specified milliseconds
+- `useHeld`: Use currently equipped hotbar item
+- `setHotbar <0-8>`: Select hotbar slot
+- `winClick <slot> <type>`: Click window/inventory item (`0` = left click, `1` = right click)
+- `closeWindow`: Close open container window
+- `drop [slot]`: Drop specific slot item or all items
+- `startMove <direction>` / `stopMove <direction>`: Directional movement (`forward`, `back`, `left`, `right`, `jump`, `sneak`, `sprint`)
+- `resetMove`: Reset all movement states
+- `afkOn` / `afkOff`: Toggle Anti-AFK module
+- `disconnect` / `reconnect`: Manage connection state
+- `startScript`: Loop the script from the start
 
-Variables: Player Name: `{player}`, Random String: `{random}`
+---
 
-Example:
-```
-chat Hello there! {player}
-chat /help
-```
-### useHeld
-Uses the current held item.
-Usage: `useHeld`
-### setHotbar
-Sets hotbar to the selected slot.
-Usage: `setHotbar <number>`
-
-Example:
-```
-setHotbar 0
-setHotbar 3
-```
-### winClick
-Clicks on a window item. To left click, use `0`. Otherwise, to right click, use `1`.
-Usage: `winClick <number> <type>`
-
-Example:
-```
-winClick 36 0
-winClick 24 1
-```
-**If you are struggling on what slots you should click, here are some images to represent!**
-
-**Every chest starts from `0`**
-
-#### Chest interface:
-
-![Chest](https://github.com/RattlesHyper/TrafficerMC/assets/83329088/058fd1d2-69c2-41f6-bfd3-3b9665c037e5)
-
-#### Inventory interface:
-
-![Inventory](https://github.com/RattlesHyper/TrafficerMC/assets/83329088/83f952e2-18f1-4c79-8a6d-e7a6880a6879)
-
-### closeWindow
-Closes the current window.
-Usage: `closeWindow`
-### Drop
-Drops the slot item if none specified drops all.
-Usage: `drop <number>`
-
-Example:
-```
-drop
-drop 36
-```
-### Movement
-Controls the bot movement.
-Usage: `startMove/stopMove <forward/backwards/left/right/jump/sneak/sprint>`
-
-Reset controls: `resetMove`
-
-Example:
-```
-startControl forward
-startControl jump
-stopControl forward
-```
-### Anti-AFK
-Enables/Disables Anti-AFK on the bot.
-Usage: `afkOn/afkOff`
-### Disconnect
-Disconnects the Bot.
-Usage: `disconnect`
-### Reconnect
-Reconnects the bot.
-Usage: `reconnect`
-### startScript
-Starts the script.
-Usage: `startScript`
-### Delay
-Delays the next task.
-Usage: `delay <milliseconds>` default 1000
-
-Example:
-```
-chat Hi
-delay 1200
-chat Hello
-```
-# Account File
-Account file must be a `.txt` file. Put the usernames of the accounts you want to use line by line. Microsoft accounts can be used the same way.
-
-**Please note that you can set Max Accounts in General Tab or it will use all the names**
-## What an account file would look like
-```
-vampers
-nVoid
-Danilo764
-```
-# Proxies
-TrafficerMC supports HTTP, SOCKS4, and SOCKS5 proxy protocols with full authentication support.
-## What a proxy file would look like
-```
-ProxyIP:ProxyPORT:Username:Password
-98.7.65.4:32101
-```
-
-# Build Guide
-
-**Requirements:** [NodeJS](https://nodejs.org/en/download)
-
-Clone TrafficerMC repo with Git Clone: `git clone https://github.com/RattlesHyper/TrafficerMC` or Download the Source Code, then navigate to the folder. and open Terminal/Command Prompt/PowerShell
-
-**Build Commands:**
-
-**Install Dependencies** `npm install`
-
-**Windows:** `build:win`
-
-**Mac:** `build:mac`
-
-**Linux:** `build:linux`
-
-If you want to run from source code use `npm run dev`
+## 📄 License
+This project is open-source under the [MIT License](LICENSE).
+Fork maintained by [siberanka](https://github.com/siberanka).

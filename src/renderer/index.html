@@ -2,23 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrafficerMC</title>
     <link href="./assets/css/main.css" type="text/css" rel="stylesheet" />
   </head>
 
   <body>
     <div class="content">
-      <div class="topbar drag" style="width: 1000px">
+      <!-- Titlebar / Header -->
+      <div class="topbar drag">
         <div class="flex">
-          <img src="./assets/icons/icon.png" class="icon-sm" />
+          <img src="./assets/icons/icon.png" class="icon-sm" alt="TrafficerMC" />
           <p class="gradient">TrafficerMC</p>
-          <p id="versionString" class="tip" style="margin-left: 5px"></p>
+          <span id="versionString">v3.6</span>
         </div>
-        <div>
-          <img src="./assets/icons/min.svg" class="icon-sm button" id="minimize" />
-          <img src="./assets/icons/x.svg" class="icon-sm button" id="close" />
+        <div class="flex">
+          <img src="./assets/icons/min.svg" class="icon-sm" id="minimize" title="Minimize" />
+          <img src="./assets/icons/x.svg" class="icon-sm" id="close" title="Close" />
         </div>
       </div>
-      <div class="area" style="width: 1000px; height: 440px">
+
+      <!-- Main Application Area -->
+      <div class="area">
+        <!-- Sidebar Navigation -->
         <ul class="sidebar">
           <li class="tab tab-pane selected">General</li>
           <li id="bottingTab" class="tab tab-pane">Botting</li>
@@ -28,61 +34,59 @@
           <li class="tab tab-pane">About</li>
         </ul>
 
+        <!-- Control Panes -->
         <div class="controlArea">
+          <!-- 1. General Tab -->
           <div class="tab-pane" id="general" style="display: block">
-            <div class="m-4 space-h">
-              <div>
-                <div class="flex">
-                  <div id="usernameDiv">
-                    <div class="flex">
-                      <div id="usernameSubDiv" class="flex">
-                        <div class="flex">
-                          <p class="text-sm pr-4">Username:</p>
-                          <input
-                            id="username"
-                            type="text"
-                            class=""
-                            placeholder="username / token"
-                          />
-                        </div>
-                      </div>
-                    </div>
+            <div class="ui-grid-2">
+              <!-- Connection Card -->
+              <div class="ui-card">
+                <div class="ui-card-title">
+                  <span>Connection & Server</span>
+                </div>
+
+                <div class="ui-field">
+                  <span class="text-sm">Server:</span>
+                  <input id="server" type="text" placeholder="localhost:25565" />
+                </div>
+
+                <div class="ui-field" id="usernameDiv">
+                  <div id="usernameSubDiv" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                    <span class="text-sm">Username:</span>
+                    <input id="username" type="text" placeholder="username / token" />
                   </div>
                 </div>
 
-                <div class="flex mu-2">
-                  <p class="text-sm pr-4">Server:</p>
-                  <input id="server" type="text" class="" placeholder="localhost:25565" />
+                <div class="ui-field">
+                  <span class="text-sm">Max accounts:</span>
+                  <input id="botMax" type="number" min="1" placeholder="1" />
                 </div>
 
-                <div class="flex mu-2">
-                  <p class="text-sm pr-4">Max accounts:</p>
-                  <input id="botMax" type="number" min="1" class="" placeholder="1" />
+                <div class="ui-field">
+                  <span class="text-sm">Join delay:</span>
+                  <input id="joinDelay" type="number" min="0" placeholder="1000 (ms)" />
                 </div>
 
-                <div class="flex mu-2">
-                  <p class="text-sm pr-4">Join delay:</p>
-                  <input id="joinDelay" type="number" min="0" class="" placeholder="1000" />
+                <div class="ui-field">
+                  <span class="text-sm">Join message:</span>
+                  <input id="joinMessage" type="text" placeholder="/register" />
                 </div>
 
-                <div class="flex mu-2">
-                  <p class="text-sm pr-4">Join message:</p>
-                  <input id="joinMessage" type="text" class="" placeholder="/register" />
-                </div>
-
-                <div class="mu-4">
-                  <button id="btnStart" class="button">Start</button>
-                  <button id="btnStop" class="button">Stop</button>
+                <div class="flex" style="gap: 10px; margin-top: 8px;">
+                  <button id="btnStart" style="flex: 1;">Start Bots</button>
+                  <button id="btnStop" style="flex: 1;">Stop Bots</button>
                 </div>
               </div>
 
-              <div class="pr-4" style="width: 300px">
-                <p class="text-sm">Options</p>
+              <!-- Options & Auth Card -->
+              <div class="ui-card">
+                <div class="ui-card-title">
+                  <span>Configuration & Auth</span>
+                </div>
 
-                <div class="flex mu-1">
-                  <p class="text-sm">Name:</p>
-
-                  <select id="nameType" class="mu-1">
+                <div class="ui-field">
+                  <span class="text-sm">Name Type:</span>
+                  <select id="nameType">
                     <option value="default">Default</option>
                     <option value="random">Random</option>
                     <option value="legit">Legit</option>
@@ -90,28 +94,24 @@
                   </select>
                 </div>
 
-                <div id="nameFileDiv" class="mu-2" style="display: none">
-                  <div class="flex">
-                    <p class="text-sm pr-4">File:</p>
-                    <label id="nameFileLabel" class="text-sm input-file button"
-                      >Choose a file</label
-                    >
-                  </div>
+                <div class="ui-field" id="nameFileDiv" style="display: none">
+                  <span class="text-sm">Name File:</span>
+                  <label id="nameFileLabel" class="button" style="flex: 1; text-align: center;">Choose a file</label>
                 </div>
 
-                <div class="flex mu-2">
-                  <p class="text-sm">Auth:</p>
-                  <select id="authType" class="mu">
-                    <option value="offline">Cracked</option>
+                <div class="ui-field">
+                  <span class="text-sm">Auth Type:</span>
+                  <select id="authType">
+                    <option value="offline">Cracked (Offline)</option>
                     <option value="microsoft">Microsoft</option>
                     <option value="easymc">EasyMC</option>
                   </select>
                 </div>
 
-                <div class="flex mu-2">
-                  <p class="text-sm">Version:</p>
-                  <select id="version" class="mu-1">
-                    <option value="">Auto</option>
+                <div class="ui-field">
+                  <span class="text-sm">Version:</span>
+                  <select id="version">
+                    <option value="">Auto Detect</option>
                     <option value="26.2">26.2</option>
                     <option value="26.1">26.1</option>
                     <option value="26.0">26.0</option>
@@ -171,28 +171,27 @@
                   </select>
                 </div>
 
-                <div class="flex mu-2">
-                  <p class="text-sm">Mode:</p>
-                  <select id="botMode" class="mu-1">
+                <div class="ui-field">
+                  <span class="text-sm">Mode:</span>
+                  <select id="botMode">
                     <option value="normal">Normal</option>
                     <option value="minimal">Minimal</option>
                   </select>
                 </div>
 
-                <div class="mu-2">
+                <div style="border-top: 1px solid var(--ev-border); padding-top: 10px; margin-top: 4px;">
                   <label class="containerCheckbox">
-                    Auto Auth (AuthMe)
+                    Auto Auth (AuthMe Reloaded)
                     <input id="autoAuth" type="checkbox" />
                     <span class="checkmark"></span>
                   </label>
                 </div>
 
-                <div class="flex mu-2">
-                  <p class="text-sm pr-2">Auth Pass:</p>
+                <div class="ui-field">
+                  <span class="text-sm">Auth Pass:</span>
                   <input
                     id="authPassword"
                     type="text"
-                    class=""
                     value="trafficermc123a"
                     placeholder="trafficermc123a"
                   />
@@ -201,22 +200,25 @@
             </div>
           </div>
 
+          <!-- 2. Botting Tab -->
           <div class="tab-pane" id="botting" style="display: none">
-            <div class="space-h" style="width: 890px; height: 440px">
-              <div class="m-4">
-                <ul class="border" id="botList" style="height: 150px"></ul>
-
-                <div class="space-h mu-2">
-                  <label class="containerCheckbox">
-                    Auto
-                    <input id="autoSelect" type="checkbox" checked />
-                    <span class="checkmark"></span>
-                  </label>
-
-                  <button id="selectAll">Select</button>
+            <div style="display: flex; gap: 16px; height: 100%;">
+              <!-- Column 1: Bot List & Subtabs -->
+              <div style="width: 200px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;">
+                <div class="ui-card" style="padding: 12px; gap: 8px;">
+                  <span class="text-sm" style="color: #ffffff;">Connected Bots</span>
+                  <ul id="botList" class="border"></ul>
+                  <div class="space-h" style="margin-top: 4px;">
+                    <label class="containerCheckbox">
+                      Auto
+                      <input id="autoSelect" type="checkbox" checked />
+                      <span class="checkmark"></span>
+                    </label>
+                    <button id="selectAll" style="padding: 4px 10px; font-size: 11px;">Select All</button>
+                  </div>
                 </div>
 
-                <ul id="controlList" class="border mu-2 flex-c">
+                <ul id="controlList">
                   <li class="tab-2 control-tab selected">Controls</li>
                   <li class="tab-2 control-tab">Chat</li>
                   <li class="tab-2 control-tab">Hotbar</li>
@@ -228,56 +230,50 @@
                 </ul>
               </div>
 
-              <div class="m-4">
+              <!-- Column 2: Active Control Action Panel -->
+              <div class="ui-card" style="flex: 1; min-width: 240px; height: fit-content;">
+                <!-- Controls -->
                 <div id="controls" class="control-tab" style="display: block">
-                  <p class="text">Controls</p>
-                  <div class="mu-2 input-group">
-                    <button id="btnDisconnect">Disconnect</button>
+                  <div class="ui-card-title">Bot Controls</div>
+                  <div style="margin-top: 12px;">
+                    <button id="btnDisconnect" style="background: #ef4444; border-color: #dc2626; color: #fff; width: 100%;">Disconnect Bot</button>
                   </div>
                 </div>
 
+                <!-- Chat -->
                 <div id="chat" class="control-tab" style="display: none">
-                  <p class="text">Chat</p>
-
-                  <div class="space-h-f">
-                    <p class="text-sm mu-2">Chat</p>
+                  <div class="ui-card-title">Chat & Spammer</div>
+                  <div class="flex-c" style="gap: 8px; margin-top: 10px;">
+                    <input id="chatMsg" type="text" placeholder="Message to send" />
+                    <button id="btnChat" style="width: 100%;">Send Message</button>
                   </div>
 
-                  <div class="space-h-f">
-                    <input id="chatMsg" type="text" placeholder="Message" />
-                  </div>
-
-                  <div class="space-h-f mu-2">
-                    <button id="btnChat">Send</button>
-                  </div>
-
-                  <div class="space-h-f">
-                    <p class="text-sm mu-2">Spam</p>
-                  </div>
-
-                  <div class="flex">
-                    <p class="text-sm-2 pr-4">Delay</p>
-                    <input id="spamDelay" type="number" placeholder="1000 (ms)" />
-                  </div>
-
-                  <div class="mu-2 space-h">
-                    <label class="containerCheckbox">
-                      Spam
-                      <input id="checkSpam" type="checkbox" />
-                      <span class="checkmark"></span>
-                    </label>
-
-                    <label class="containerCheckbox">
-                      Bypass
-                      <input id="bypassChat" type="checkbox" />
-                      <span class="checkmark"></span>
-                    </label>
+                  <div style="border-top: 1px solid var(--ev-border); padding-top: 10px; margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+                    <span class="text-sm">Spammer Options</span>
+                    <div class="ui-field">
+                      <span class="text-sm-2">Spam Delay:</span>
+                      <input id="spamDelay" type="number" placeholder="1000 (ms)" />
+                    </div>
+                    <div class="space-h">
+                      <label class="containerCheckbox">
+                        Spam
+                        <input id="checkSpam" type="checkbox" />
+                        <span class="checkmark"></span>
+                      </label>
+                      <label class="containerCheckbox">
+                        Bypass
+                        <input id="bypassChat" type="checkbox" />
+                        <span class="checkmark"></span>
+                      </label>
+                    </div>
                   </div>
                 </div>
 
+                <!-- Hotbar -->
                 <div id="hotbar" class="control-tab" style="display: none">
-                  <p class="text">Hotbar</p>
-                  <div class="mu-2 space-h">
+                  <div class="ui-card-title">Hotbar Controls</div>
+                  <div class="ui-field" style="margin-top: 10px;">
+                    <span class="text-sm">Slot:</span>
                     <select id="hotbarSlot">
                       <option value="0">Slot 1</option>
                       <option value="1">Slot 2</option>
@@ -290,52 +286,43 @@
                       <option value="8">Slot 9</option>
                     </select>
                   </div>
-
-                  <div class="mu-2 space-h-f">
-                    <button id="btnSetHotbar">Set</button>
-                    <button id="btnUseheld">Use</button>
+                  <div class="flex" style="gap: 8px; margin-top: 12px;">
+                    <button id="btnSetHotbar" style="flex: 1;">Equip Slot</button>
+                    <button id="btnUseheld" style="flex: 1;">Use Item</button>
                   </div>
                 </div>
 
+                <!-- Inventory -->
                 <div id="inventory" class="control-tab" style="display: none">
-                  <p class="text">Inventory</p>
-
-                  <div class="flex">
-                    <p class="text-sm pr-4">Slot</p>
-                    <input id="invSlot" type="number" placeholder="number" />
+                  <div class="ui-card-title">Inventory Manager</div>
+                  <div class="ui-field" style="margin-top: 10px;">
+                    <span class="text-sm">Slot ID:</span>
+                    <input id="invSlot" type="number" placeholder="Slot number" />
                   </div>
-
-                  <div class="mu-2 space-h">
-                    <p class="text-sm">Click</p>
+                  <div class="flex-c" style="gap: 8px; margin-top: 10px;">
+                    <span class="text-sm-2">Click Window:</span>
+                    <div class="flex" style="gap: 8px;">
+                      <button id="btnWinClickLeft" style="flex: 1;">Left Click</button>
+                      <button id="btnWinClickRight" style="flex: 1;">Right Click</button>
+                    </div>
                   </div>
-
-                  <div class="space-h-f">
-                    <button id="btnWinClickLeft">Left</button>
-                    <button id="btnWinClickRight">Right</button>
+                  <div class="flex-c" style="gap: 8px; margin-top: 10px;">
+                    <span class="text-sm-2">Drop Items:</span>
+                    <div class="flex" style="gap: 8px;">
+                      <button id="btnDropSlot" style="flex: 1;">Drop Slot</button>
+                      <button id="btnDropAll" style="flex: 1;">Drop All</button>
+                    </div>
                   </div>
-
-                  <div class="mu-2 space-h">
-                    <p class="text-sm">Drop</p>
-                  </div>
-
-                  <div class="space-h-f">
-                    <button id="btnDropSlot">Slot</button>
-                    <button id="btnDropAll">All</button>
-                  </div>
-
-                  <div class="mu-2 space-h">
-                    <p class="text-sm">Close window</p>
-                  </div>
-
-                  <div class="space-h-f">
-                    <button id="btnCloseWindow">Close</button>
+                  <div style="margin-top: 12px;">
+                    <button id="btnCloseWindow" style="width: 100%;">Close Window</button>
                   </div>
                 </div>
 
+                <!-- Move -->
                 <div id="move" class="control-tab" style="display: none">
-                  <p class="text">Move</p>
-
-                  <div class="flex mu-2">
+                  <div class="ui-card-title">Movement</div>
+                  <div class="ui-field" style="margin-top: 10px;">
+                    <span class="text-sm">Action:</span>
                     <select id="moveType">
                       <option value="forward">Forward</option>
                       <option value="back">Backwards</option>
@@ -345,65 +332,59 @@
                       <option value="sprint">Sprint</option>
                       <option value="sneak">Sneak</option>
                     </select>
-
-                    <button id="btnResetMove">Reset</button>
                   </div>
-
-                  <div class="mu-2">
-                    <button id="btnStartMove">Start</button>
-                    <button id="btnStopMove">Stop</button>
+                  <div class="flex" style="gap: 8px; margin-top: 12px;">
+                    <button id="btnStartMove" style="flex: 1;">Start</button>
+                    <button id="btnStopMove" style="flex: 1;">Stop</button>
+                    <button id="btnResetMove" style="flex: 1;">Reset</button>
                   </div>
                 </div>
 
+                <!-- Look -->
                 <div id="look" class="control-tab" style="display: none">
-                  <p class="text">Look</p>
-
-                  <div class="flex mu-2">
+                  <div class="ui-card-title">Look Direction</div>
+                  <div class="ui-field" style="margin-top: 10px;">
+                    <span class="text-sm">Direction:</span>
                     <select id="lookDirection">
                       <option value="0">North</option>
                       <option value="3">South</option>
                       <option value="-1.5">East</option>
                       <option value="1.5">West</option>
                     </select>
-                    <button id="btnLook">Look</button>
+                  </div>
+                  <div style="margin-top: 12px;">
+                    <button id="btnLook" style="width: 100%;">Look Direction</button>
                   </div>
                 </div>
 
+                <!-- AntiAFK -->
                 <div id="antiafk" class="control-tab" style="display: none">
-                  <p class="text">Anti AFK</p>
-
-                  <div class="mu-2">
-                    <button id="btnAfkOn">Start</button>
-                    <button id="btnAfkOff">Stop</button>
+                  <div class="ui-card-title">Anti-AFK Module</div>
+                  <div class="flex" style="gap: 8px; margin-top: 14px;">
+                    <button id="btnAfkOn" style="flex: 1; background: #10b981; border-color: #059669; color: #fff;">Start Anti-AFK</button>
+                    <button id="btnAfkOff" style="flex: 1; background: #ef4444; border-color: #dc2626; color: #fff;">Stop Anti-AFK</button>
                   </div>
                 </div>
 
+                <!-- KillAura -->
                 <div id="killaura" class="control-tab" style="display: none">
-                  <p class="text">KillAura</p>
-
-                  <div class="mu-2">
-                    <div class="space-h-f">
-                      <p class="text-sm">Targets</p>
-                    </div>
-
-                    <label class="containerCheckbox mu-2">
+                  <div class="ui-card-title">KillAura Settings</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
+                    <label class="containerCheckbox">
                       Player
                       <input id="targetPlayer" type="checkbox" />
                       <span class="checkmark"></span>
                     </label>
-
                     <label class="containerCheckbox">
                       Vehicle
                       <input id="targetVehicle" type="checkbox" />
                       <span class="checkmark"></span>
                     </label>
-
                     <label class="containerCheckbox">
                       Mob
                       <input id="targetMob" type="checkbox" />
                       <span class="checkmark"></span>
                     </label>
-
                     <label class="containerCheckbox">
                       Animal
                       <input id="targetAnimal" type="checkbox" />
@@ -411,40 +392,28 @@
                     </label>
                   </div>
 
-                  <div class="mu-2">
-                    <div class="space-h-f">
-                      <p class="text-sm">Settings</p>
-                    </div>
+                  <div class="ui-field" style="margin-top: 10px;">
+                    <span class="text-sm-2">Attack Delay:</span>
+                    <input id="killauraDelay" type="number" placeholder="10 (ticks)" />
+                  </div>
 
-                    <div class="flex">
-                      <p class="text-sm-2 pr-4">Delay</p>
-                      <input id="killauraDelay" type="number" placeholder="10 (ticks)" />
+                  <div class="slidecontainer space-h" style="margin-top: 8px;">
+                    <span class="text-sm-2">Range:</span>
+                    <div class="flex" style="align-items: center; gap: 8px; flex: 1; margin-left: 12px;">
+                      <span class="text-sm-2">1</span>
+                      <input id="killauraRange" type="range" min="1" max="6" value="1" class="slider" />
+                      <span class="text-sm-2">6</span>
                     </div>
+                  </div>
 
-                    <div class="slidecontainer space-h mu-2">
-                      <p class="text-sm-2">Range</p>
-                      <div class="flex">
-                        <p class="text-sm-2 pl-2">1</p>
-                        <input
-                          id="killauraRange"
-                          type="range"
-                          min="1"
-                          max="6"
-                          value="1"
-                          class="slider"
-                        />
-                        <p class="text-sm-2 pl-2">6</p>
-                      </div>
-                    </div>
-
-                    <label class="containerCheckbox mu-2">
-                      Rotate
+                  <div class="space-h" style="margin-top: 10px;">
+                    <label class="containerCheckbox">
+                      Rotate Head
                       <input id="killauraRotate" type="checkbox" />
                       <span class="checkmark"></span>
                     </label>
-
-                    <label class="containerCheckbox mu-2">
-                      Toggle
+                    <label class="containerCheckbox">
+                      Toggle Aura
                       <input id="killauraToggle" type="checkbox" />
                       <span class="checkmark"></span>
                     </label>
@@ -452,74 +421,78 @@
                 </div>
               </div>
 
-              <div class="m-4 pr-4">
-                <ul id="chatBox" class="border"></ul>
-
-                <div class="space-h mu-2">
+              <!-- Column 3: Live Chat Log -->
+              <div class="ui-card" style="flex: 1.2; min-width: 280px; display: flex; flex-direction: column;">
+                <div class="ui-card-title">
+                  <span>Server & Bot Chat Log</span>
+                </div>
+                <ul id="chatBox" style="flex: 1;"></ul>
+                <div class="space-h" style="margin-top: 8px;">
                   <label class="containerCheckbox">
-                    Show chat
+                    Show Chat
                     <input id="enableChat" type="checkbox" checked />
                     <span class="checkmark"></span>
                   </label>
-
                   <label class="containerCheckbox">
-                    Auto scroll
+                    Auto Scroll
                     <input id="autoScrollChat" type="checkbox" checked />
                     <span class="checkmark"></span>
                   </label>
-
-                  <button id="clearChat">Clear</button>
+                  <button id="clearChat" style="padding: 4px 10px; font-size: 11px;">Clear</button>
                 </div>
               </div>
             </div>
           </div>
 
+          <!-- 3. Scripting Tab -->
           <div class="tab-pane" id="scripting" style="display: none">
-            <div class="space-h">
-              <div class="m-4 flex-c">
-                <p class="text-sm">Script</p>
+            <div class="ui-grid-2">
+              <div class="ui-card">
+                <div class="ui-card-title">Script Editor</div>
                 <textarea
                   id="scriptText"
                   class="textbox"
-                  style="width: 300px; height: 350px"
+                  style="height: 280px;"
                   spellcheck="false"
-                  placeholder="Chat Hello!"
+                  placeholder="chat /help&#10;wait 1000&#10;chat Hello from TrafficerMC!"
                 ></textarea>
-                <div class="space-h mu-2">
-                  <div>
-                    <button id="runScript">Start</button>
-                    <button id="stopScript">Stop</button>
+                <div class="space-h" style="margin-top: 6px;">
+                  <div class="flex" style="gap: 8px;">
+                    <button id="runScript" style="background: #10b981; border-color: #059669; color: #fff;">Run Script</button>
+                    <button id="stopScript" style="background: #ef4444; border-color: #dc2626; color: #fff;">Stop</button>
                   </div>
                   <button id="clearScript">Clear</button>
                 </div>
               </div>
 
-              <div class="m-4 pr-4" style="width: 300px">
-                <p class="text-sm">Options</p>
-
-                <label class="containerCheckbox mu-2">
-                  Run on connect
-                  <input id="runOnConnect" type="checkbox" />
-                  <span class="checkmark"></span>
-                </label>
-
-                <label class="containerCheckbox mu-1">
-                  Run on spawn
-                  <input id="runOnSpawn" type="checkbox" />
-                  <span class="checkmark"></span>
-                </label>
+              <div class="ui-card">
+                <div class="ui-card-title">Script Options</div>
+                <div class="flex-c" style="gap: 12px; margin-top: 6px;">
+                  <label class="containerCheckbox">
+                    Run on connect
+                    <input id="runOnConnect" type="checkbox" />
+                    <span class="checkmark"></span>
+                  </label>
+                  <label class="containerCheckbox">
+                    Run on spawn
+                    <input id="runOnSpawn" type="checkbox" />
+                    <span class="checkmark"></span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>
 
+          <!-- 4. Proxy Tab -->
           <div class="tab-pane" id="proxy" style="display: none">
-            <div class="space-h">
-              <div class="m-4 flex-c">
-                <div class="space-h">
-                  <p class="text-sm">Proxy</p>
-                  <div class="flex">
-                    <p class="text-sm">Type:</p>
-                    <select id="proxyType">
+            <div class="ui-grid-2">
+              <!-- Left Card: Proxy List & Local Testing -->
+              <div class="ui-card">
+                <div class="ui-card-title">
+                  <span>Proxy List</span>
+                  <div class="flex" style="align-items: center; gap: 8px;">
+                    <span class="text-sm">Type:</span>
+                    <select id="proxyType" style="width: 100px;">
                       <option value="none">None</option>
                       <option value="socks4">SOCKS4</option>
                       <option value="socks5">SOCKS5</option>
@@ -531,45 +504,25 @@
                 <textarea
                   id="proxyList"
                   class="textbox"
-                  style="width: 300px; height: 350px"
-                  placeholder="Proxy:Port:Username:Password"
+                  style="height: 240px;"
+                  placeholder="ip:port&#10;ip:port:user:pass"
                 ></textarea>
-                <div class="space-h mu-2">
-                  <div>
-                    <button id="proxyTestStart">Test</button>
+
+                <div class="space-h" style="margin-top: 4px;">
+                  <div class="flex" style="gap: 8px;">
+                    <button id="proxyTestStart">Test Proxies</button>
                     <button id="proxyTestStop">Stop</button>
                   </div>
-                  <button id="proxyListClear">Clear</button>
+                  <button id="proxyListClear">Clear List</button>
                 </div>
               </div>
 
-              <div class="m-4 pr-4" style="width: 300px">
-                <p class="text-sm">Options</p>
+              <!-- Right Card: Live Fetching & Options -->
+              <div class="ui-card">
+                <div class="ui-card-title">Live Scraper & Options</div>
 
-                <div class="slidecontainer space-h mu-1">
-                  <p class="text-sm-2">Proxy per bot</p>
-                  <div class="flex" style="position: relative; right: 15px">
-                    <p class="text-sm-2 pl-2">1</p>
-                    <input
-                      id="proxyPerBot"
-                      type="range"
-                      min="1"
-                      max="10"
-                      value="1"
-                      class="slider"
-                    />
-                    <p class="text-sm-2 pl-2">10</p>
-                  </div>
-                </div>
-
-                <label class="containerCheckbox mu-1">
-                  Randomize order
-                  <input id="randomizeOrder" type="checkbox" />
-                  <span class="checkmark"></span>
-                </label>
-
-                <div class="flex mu-1">
-                  <p class="text-sm-2 pr-2">Source:</p>
+                <div class="ui-field">
+                  <span class="text-sm">Source:</span>
                   <select id="proxySource">
                     <option value="all">All Sources</option>
                     <option value="proxyscrape">ProxyScrape API</option>
@@ -579,8 +532,8 @@
                   </select>
                 </div>
 
-                <div class="flex mu-1">
-                  <p class="text-sm-2 pr-2">Anonymity:</p>
+                <div class="ui-field">
+                  <span class="text-sm">Anonymity:</span>
                   <select id="proxyAnonymity">
                     <option value="all">All</option>
                     <option value="elite">Elite</option>
@@ -589,112 +542,109 @@
                   </select>
                 </div>
 
-                <details class="mu-1" style="cursor: pointer">
-                  <summary class="text-sm-2">Custom Raw URLs</summary>
+                <details style="cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid var(--ev-border); border-radius: 6px; padding: 6px 10px;">
+                  <summary class="text-sm-2" style="color: var(--ev-c-accent); font-weight: 600;">Custom Raw URLs (+)</summary>
                   <textarea
                     id="customProxyUrls"
-                    class="textbox mu-1"
-                    style="width: 100%; height: 60px; font-size: 11px; resize: vertical"
+                    class="textbox"
+                    style="width: 100%; height: 55px; font-size: 11px; margin-top: 6px; resize: vertical;"
                     placeholder="https://raw.github.../list.txt (1 URL per line)"
                   ></textarea>
                 </details>
 
-                <div class="mu-1">
-                  <button id="proxyDownloadWeb" class="button" style="width: 100%">
-                    Download Web List
-                  </button>
-                </div>
-                <div class="space-h mu-1">
-                  <button id="proxyScrape">Scrape</button>
-                  <button id="proxyClearDupe">Clear Dupe</button>
+                <div class="flex" style="gap: 8px;">
+                  <button id="proxyDownloadWeb" style="flex: 1.5; font-weight: 700;">Download Web List</button>
+                  <button id="proxyScrape" style="flex: 1;">Scrape</button>
+                  <button id="proxyClearDupe" style="flex: 1;">Clear Dupes</button>
                 </div>
 
-                <p class="text-sm mu-4">Proxy test</p>
-
-                <div class="flex mu-2">
-                  <p class="text-sm-2 pr-4">Delay</p>
-                  <input id="proxyCheckDelay" type="number" placeholder="100 (ms)" />
+                <div class="ui-field" style="margin-top: 4px;">
+                  <span class="text-sm-2">Proxy per bot:</span>
+                  <div class="flex" style="align-items: center; gap: 8px; flex: 1;">
+                    <span class="text-sm-2">1</span>
+                    <input id="proxyPerBot" type="range" min="1" max="10" value="1" class="slider" />
+                    <span class="text-sm-2">10</span>
+                  </div>
                 </div>
 
-                <div class="flex mu-2">
-                  <p class="text-sm-2 pr-4">Timeout</p>
-                  <input id="proxyCheckTimeout" type="number" placeholder="5000 (ms)" />
+                <div class="space-h">
+                  <label class="containerCheckbox">
+                    Randomize order
+                    <input id="randomizeOrder" type="checkbox" />
+                    <span class="checkmark"></span>
+                  </label>
+                  <div class="flex" style="gap: 8px; align-items: center;">
+                    <span class="text-sm-2">Delay:</span>
+                    <input id="proxyCheckDelay" type="number" style="width: 70px;" placeholder="100ms" />
+                    <span class="text-sm-2">Timeout:</span>
+                    <input id="proxyCheckTimeout" type="number" style="width: 70px;" placeholder="5000ms" />
+                  </div>
                 </div>
 
-                <p class="text-sm mu-4">Logs</p>
+                <!-- Proxy Logs -->
+                <ul id="proxyLogbox"></ul>
 
-                <ul id="proxyLogbox" class="border mu-2"></ul>
-
-                <div class="space-h mu-2">
+                <div class="space-h">
                   <label class="containerCheckbox">
                     Auto scroll
                     <input id="autoScrollProxy" type="checkbox" checked />
                     <span class="checkmark"></span>
                   </label>
-                  <button id="proxyLogClear">Clear</button>
+                  <button id="proxyLogClear" style="padding: 3px 8px; font-size: 11px;">Clear Log</button>
                 </div>
               </div>
             </div>
           </div>
 
+          <!-- 5. Webhook Tab -->
           <div class="tab-pane" id="webhook" style="display: none">
-            <div class="space-h">
-              <div class="m-4 flex-c">
-                <div class="space-h">
+            <div class="ui-card" style="max-width: 600px; margin: 0 auto;">
+              <div class="ui-card-title">Discord Webhook Integration</div>
+              <div class="ui-field" style="margin-top: 8px;">
+                <label class="containerCheckbox" style="min-width: 110px;">
+                  Enable:
+                  <input id="enableWebhook" type="checkbox" />
+                  <span class="checkmark"></span>
+                </label>
+                <input id="webhookLink" type="text" placeholder="https://discord.com/api/webhooks/..." style="flex: 1;" />
+                <button id="webhookTest">Test</button>
+              </div>
+
+              <div style="border-top: 1px solid var(--ev-border); padding-top: 12px; margin-top: 12px;">
+                <span class="text-sm" style="display: block; margin-bottom: 8px;">Webhook Log Channels:</span>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                   <label class="containerCheckbox">
-                    Webhook:
-                    <input id="enableWebhook" type="checkbox" />
-                    <span class="checkmark"></span>
-                  </label>
-
-                  <div class="flex pr-4">
-                    <input id="webhookLink" type="text" class="" placeholder="https://..." />
-                  </div>
-
-                  <button id="webhookTest">Test</button>
-                </div>
-
-                <div class="mu-4">
-                  <p class="text-sm">Logs</p>
-
-                  <label class="containerCheckbox mu-1">
                     Actions
                     <input id="actionLogWebhook" type="checkbox" />
                     <span class="checkmark"></span>
                   </label>
-
-                  <label class="containerCheckbox mu-1">
-                    Proxy error
+                  <label class="containerCheckbox">
+                    Proxy errors
                     <input id="proxyLogWebhook" type="checkbox" />
                     <span class="checkmark"></span>
                   </label>
-
-                  <label class="containerCheckbox mu-1">
+                  <label class="containerCheckbox">
                     Chat
                     <input id="chatLogWebhook" type="checkbox" />
                     <span class="checkmark"></span>
                   </label>
-
-                  <label class="containerCheckbox mu-1">
+                  <label class="containerCheckbox">
                     Feedback
                     <input id="feedbackLogWebhook" type="checkbox" />
                     <span class="checkmark"></span>
                   </label>
-
-                  <label class="containerCheckbox mu-1">
+                  <label class="containerCheckbox">
                     Joins
                     <input id="joinLogWebhook" type="checkbox" />
                     <span class="checkmark"></span>
                   </label>
-
-                  <label class="containerCheckbox mu-1">
+                  <label class="containerCheckbox">
                     Kicks
                     <input id="kickLogWebhook" type="checkbox" />
                     <span class="checkmark"></span>
                   </label>
-
-                  <label class="containerCheckbox mu-1">
-                    Auth message
+                  <label class="containerCheckbox">
+                    Auth messages
                     <input id="authLogWebhook" type="checkbox" />
                     <span class="checkmark"></span>
                   </label>
@@ -703,123 +653,101 @@
             </div>
           </div>
 
+          <!-- 6. About Tab -->
           <div class="tab-pane" id="about" style="display: none">
-            <div class="m-4">
-              <div class="flex" style="justify-content: center">
-                <div class="flex-c">
-                  <div class="flex">
-                    <img src="./assets/icons/icon.png" style="width: 80px" />
-                    <p class="gradient" style="font-size: 50px">TrafficerMC</p>
-                  </div>
-
-                  <div class="m-4 pl-2 space-h">
-                    <a
-                      href="https://discord.com/invite/uFpaAZdVgS"
-                      target="_blank"
-                      rel="noreferrer"
-                      class="tip"
-                      >Discord</a
-                    >
-                    <a
-                      href="https://youtube.com/rattleshyper"
-                      target="_blank"
-                      rel="noreferrer"
-                      class="tip"
-                      >YouTube</a
-                    >
-                    <a
-                      href="https://github.com/RattlesHyper/TrafficerMC"
-                      target="_blank"
-                      rel="noreferrer"
-                      class="tip"
-                      >GitHub</a
-                    >
-                  </div>
-                </div>
+            <div class="ui-card" style="max-width: 480px; margin: 30px auto; text-align: center; align-items: center; gap: 14px;">
+              <img src="./assets/icons/icon.png" style="width: 72px; height: 72px;" alt="TrafficerMC" />
+              <span class="text" style="font-size: 24px; color: #ffffff;">TrafficerMC</span>
+              <p class="tip">High-performance Minecraft botting, stress-testing, and proxy orchestration tool.</p>
+              <div class="flex" style="gap: 12px; margin-top: 10px;">
+                <a href="https://discord.com/invite/uFpaAZdVgS" target="_blank" rel="noreferrer" class="button">Discord</a>
+                <a href="https://youtube.com/rattleshyper" target="_blank" rel="noreferrer" class="button">YouTube</a>
+                <a href="https://github.com/siberanka/TrafficerMC" target="_blank" rel="noreferrer" class="button">GitHub (siberanka)</a>
               </div>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- Notifications Toast Container -->
       <ul id="notifications" class="notification"></ul>
 
-      <ul id="settings" class="settings-tab" style="display: none">
+      <!-- Settings Modal Dialog -->
+      <div id="settings" class="settings-tab" style="display: none">
         <div class="settings-tab-content">
-          <img
-            id="closeSettings"
-            src="./assets/icons/x.svg"
-            class="icon-sm"
-            style="position: fixed; top: 90px; right: 110px"
-          />
+          <img id="closeSettings" src="./assets/icons/x.svg" class="icon-sm" title="Close" />
+          <div class="ui-card-title" style="margin-bottom: 8px;">Settings & Preferences</div>
 
-          <p class="text-sm">Bot settings</p>
-
-          <div class="flex">
-            <label class="containerCheckbox mu-1">
+          <span class="text-sm">Connection Timers</span>
+          <div class="ui-field">
+            <label class="containerCheckbox">
               Linear delay
               <input id="isLinear" type="checkbox" />
               <span class="checkmark"></span>
             </label>
-            <input id="linearDelay" type="number" placeholder="100 (ms)" />
+            <input id="linearDelay" type="number" style="width: 140px;" placeholder="100 (ms)" />
           </div>
 
-          <div class="flex">
-            <label class="containerCheckbox mu-1">
+          <div class="ui-field">
+            <label class="containerCheckbox">
               Auto Reconnect
               <input id="autoReconnect" type="checkbox" />
               <span class="checkmark"></span>
             </label>
-            <input id="reconnectDelay" type="number" placeholder="Delay 100 (ms)" />
+            <input id="reconnectDelay" type="number" style="width: 140px;" placeholder="Delay 100 (ms)" />
           </div>
 
-          <p class="text-sm mu-2">Logs</p>
-
-          <label class="containerCheckbox mu-1">
-            Actions
-            <input id="actionLogChat" type="checkbox" checked />
-            <span class="checkmark"></span>
-          </label>
-
-          <label class="containerCheckbox mu-1">
-            Proxy error
-            <input id="proxyLogChat" type="checkbox" />
-            <span class="checkmark"></span>
-          </label>
-
-          <p class="text-sm mu-2">Config</p>
-
-          <button id="resetConfig" class="mu-1">Reset</button>
-        </div>
-      </ul>
-
-      <div class="topbar downbar" style="width: 1000px">
-        <div class="flex">
-          <div class="flex">
-            <img src="./assets/icons/user.svg" class="icon-sm" />
-            <p id="botCount" class="tip">0</p>
-          </div>
-          <div class="flex" style="margin-left: 5px">
-            <img src="./assets/icons/clock.svg" class="icon-sm" />
-            <p id="idUptime" class="tip">00:00</p>
-          </div>
-          <div id="proxyCheckStatus" class="flex" style="margin-left: 5px; display: none">
-            <div class="flex">
-              <img src="./assets/icons/spinner.svg" class="icon-sm" />
-              <p id="proxyCheckStatusCount" class="tip">/</p>
+          <div style="border-top: 1px solid var(--ev-border); padding-top: 8px; margin-top: 4px;">
+            <span class="text-sm" style="display: block; margin-bottom: 6px;">Chat Logs</span>
+            <div class="flex" style="gap: 16px;">
+              <label class="containerCheckbox">
+                Actions
+                <input id="actionLogChat" type="checkbox" checked />
+                <span class="checkmark"></span>
+              </label>
+              <label class="containerCheckbox">
+                Proxy error
+                <input id="proxyLogChat" type="checkbox" />
+                <span class="checkmark"></span>
+              </label>
             </div>
+          </div>
+
+          <div style="border-top: 1px solid var(--ev-border); padding-top: 10px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center;">
+            <span class="text-sm">Reset Configuration:</span>
+            <button id="resetConfig" style="background: #ef4444; border-color: #dc2626; color: #fff;">Reset Config</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Bar / Downbar -->
+      <div class="downbar">
+        <div class="flex">
+          <div class="stat-pill">
+            <img src="./assets/icons/user.svg" alt="Bots" />
+            <span id="botCount">0</span>
+            <span>bots</span>
+          </div>
+          <div class="stat-pill">
+            <img src="./assets/icons/clock.svg" alt="Uptime" />
+            <span id="idUptime">00:00</span>
+          </div>
+          <div id="proxyCheckStatus" class="stat-pill" style="display: none">
+            <img src="./assets/icons/spinner.svg" alt="Checking" />
+            <span id="proxyCheckStatusCount">/</span>
           </div>
         </div>
         <div>
-          <img id="openSettings" src="./assets/icons/settings.svg" class="icon-sm" />
+          <img id="openSettings" src="./assets/icons/settings.svg" class="icon-sm" title="Settings" />
         </div>
       </div>
     </div>
 
+    <!-- Scripts -->
     <script type="module" src="./src/index.js"></script>
     <script>
       document.getElementById('openSettings').addEventListener('click', () => {
-        document.getElementById('settings').style.display = 'block'
+        document.getElementById('settings').style.display = 'flex'
       })
       document.getElementById('closeSettings').addEventListener('click', () => {
         document.getElementById('settings').style.display = 'none'
