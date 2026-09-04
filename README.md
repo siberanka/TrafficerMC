@@ -48,18 +48,23 @@ TrafficerMC is a modern, modular, and high-performance Minecraft client orchestr
 ## 📸 Screenshots (v3.6.0 Modern UI)
 
 ### General Tab (Connection & Configuration)
+
 ![General Tab](docs/images/general.png)
 
 ### Botting Tab (Controls & Chat)
+
 ![Botting Tab](docs/images/botting.png)
 
 ### Proxy Tab (Live Scraper & Tester)
+
 ![Proxy Tab](docs/images/proxy.png)
 
 ### Scripting Tab (Automation & Actions)
+
 ![Scripting Tab](docs/images/scripting.png)
 
 ### Settings Modal (Preferences & Delays)
+
 ![Settings Modal](docs/images/settings.png)
 
 ---
@@ -67,6 +72,7 @@ TrafficerMC is a modern, modular, and high-performance Minecraft client orchestr
 ## 🚀 Quick Start & Download
 
 ### Download Executable
+
 Directly download the latest portable Windows executable from the Releases page:
 👉 **[Download TrafficerMC Latest Release](https://github.com/siberanka/TrafficerMC/releases/latest)**
 
@@ -77,10 +83,12 @@ Simply run `TrafficerMC.exe` — no installer or Node.js runtime required.
 ## 🛠️ Building from Source
 
 ### Prerequisites
+
 - [Node.js](https://nodejs.org/) (v18 or higher recommended)
 - Git
 
 ### Installation & Run
+
 ```bash
 # Clone the repository
 git clone https://github.com/siberanka/TrafficerMC.git
@@ -97,6 +105,7 @@ npm run dev
 ```
 
 ### Packaging Executable
+
 ```bash
 # Windows Portable .exe
 npm run build:win
@@ -128,6 +137,7 @@ disconnect
 ```
 
 ### Supported Commands
+
 - `chat <message>`: Send server chat (supports `{player}` and `{random}`)
 - `delay <ms>`: Pause execution for specified milliseconds
 - `useHeld`: Use currently equipped hotbar item
@@ -144,5 +154,6 @@ disconnect
 ---
 
 ## 📄 License
+
 This project is open-source under the [MIT License](LICENSE).
 Fork maintained by [siberanka](https://github.com/siberanka).

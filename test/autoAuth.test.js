@@ -44,6 +44,7 @@ assert.strictEqual(isAuthSuccess('Please enter your password'), false)
       this._client = new EventEmitter()
       this._client.username = 'TestBot'
       this.chatCommands = []
+      this.entity = { id: 1 }
     }
     chat(cmd) {
       this.chatCommands.push(cmd)
@@ -65,6 +66,7 @@ assert.strictEqual(isAuthSuccess('Please enter your password'), false)
       this._client = new EventEmitter()
       this._client.username = 'TestBot'
       this.chatCommands = []
+      this.entity = { id: 1 }
     }
     chat(cmd) {
       this.chatCommands.push(cmd)
@@ -91,6 +93,7 @@ assert.strictEqual(isAuthSuccess('Please enter your password'), false)
       this._client = new EventEmitter()
       this._client.username = 'TestBot'
       this.chatCommands = []
+      this.entity = { id: 1 }
     }
     chat(cmd) {
       this.chatCommands.push(cmd)
@@ -122,6 +125,7 @@ assert.strictEqual(isAuthSuccess('Please enter your password'), false)
       this._client = new EventEmitter()
       this._client.username = 'TestBot'
       this.chatCommands = []
+      this.entity = { id: 1 }
     }
     chat(cmd) {
       this.chatCommands.push(cmd)
@@ -150,6 +154,7 @@ assert.strictEqual(isAuthSuccess('Please enter your password'), false)
       this._client = new EventEmitter()
       this._client.username = 'TestBot'
       this.chatCommands = []
+      this.entity = { id: 1 }
     }
     chat(cmd) {
       this.chatCommands.push(cmd)
@@ -180,6 +185,170 @@ assert.strictEqual(isAuthSuccess('Please enter your password'), false)
         'No additional commands should be sent once authenticated'
       )
       console.log('✓ Actionbar and auth success flow passed')
+    }, 50)
+  }, 50)
+}
+
+// 8. Test AuthMe Pre-Join NBT Compound Dialog with confirm input & action key
+{
+  class MockBot extends EventEmitter {
+    constructor() {
+      super()
+      this._client = new EventEmitter()
+      this._client.username = 'NewBot'
+      this.chatCommands = []
+      this.entity = { id: 2 }
+    }
+    chat(cmd) {
+      this.chatCommands.push(cmd)
+    }
+  }
+
+  const bot = new MockBot()
+  autoAuth(bot, { enabled: true, password: 'trafficermc123a', delay: 10 })
+
+  // AuthMe sends packet_show_dialog with NBT compound
+  bot._client.emit('packet_show_dialog', {
+    dialog: {
+      type: 'compound',
+      value: {
+        title: { type: 'string', value: '&6Register' },
+        action_key: { type: 'string', value: 'authme:pre_join_register_submit' },
+        inputs: {
+          type: 'list',
+          value: {
+            type: 'compound',
+            value: [
+              { name: { type: 'string', value: 'password' } },
+              { name: { type: 'string', value: 'confirm' } }
+            ]
+          }
+        }
+      }
+    }
+  })
+
+  setTimeout(() => {
+    assert.strictEqual(bot.chatCommands.length, 1)
+    assert.strictEqual(
+      bot.chatCommands[0],
+      '/register trafficermc123a trafficermc123a',
+      'Bot must register on AuthMe pre-join register dialog'
+    )
+    console.log('✓ AuthMe Pre-Join NBT Compound Register Dialog test passed')
+  }, 50)
+}
+
+// 9. Test First Join Ambiguous Dialog -> must default to register, NOT login
+{
+  class MockBot extends EventEmitter {
+    constructor() {
+      super()
+      this._client = new EventEmitter()
+      this._client.username = 'BrandNewBot'
+      this.chatCommands = []
+      this.entity = { id: 3 }
+    }
+    chat(cmd) {
+      this.chatCommands.push(cmd)
+    }
+  }
+
+  const bot = new MockBot()
+  autoAuth(bot, { enabled: true, password: 'trafficermc123a', delay: 10 })
+
+  bot._client.emit('packet_show_dialog', {
+    dialog: {
+      type: 'compound',
+      value: {
+        title: { type: 'string', value: 'Server Authentication' }
+      }
+    }
+  })
+
+  setTimeout(() => {
+    assert.strictEqual(bot.chatCommands.length, 1)
+    assert.strictEqual(
+      bot.chatCommands[0],
+      '/register trafficermc123a trafficermc123a',
+      'Ambiguous dialog on first join MUST prioritize register over login'
+    )
+    console.log('✓ First join ambiguous dialog prioritizes register passed')
+  }, 50)
+}
+
+// 10. Test Server Feedback Transitions: unregistered user error switches to register
+{
+  class MockBot extends EventEmitter {
+    constructor() {
+      super()
+      this._client = new EventEmitter()
+      this._client.username = 'RetryBot'
+      this.chatCommands = []
+      this.entity = { id: 4 }
+    }
+    chat(cmd) {
+      this.chatCommands.push(cmd)
+    }
+  }
+
+  const bot = new MockBot()
+  autoAuth(bot, { enabled: true, password: 'trafficermc123a', delay: 10 })
+
+  // Trigger login
+  bot.emit('messagestr', 'Please login with /login <password>')
+
+  setTimeout(() => {
+    assert.strictEqual(bot.chatCommands[0], '/login trafficermc123a')
+
+    // Server sends: This user isn't registered!
+    bot.emit('messagestr', "This user isn't registered!")
+
+    setTimeout(() => {
+      assert.strictEqual(
+        bot.chatCommands[1],
+        '/register trafficermc123a trafficermc123a',
+        'Should switch immediately to register upon receiving unregistered error'
+      )
+      console.log('✓ Server feedback transition (login -> register) passed')
+    }, 50)
+  }, 50)
+}
+
+// 11. Test Server Feedback Transitions: already registered switches to login
+{
+  class MockBot extends EventEmitter {
+    constructor() {
+      super()
+      this._client = new EventEmitter()
+      this._client.username = 'RegBot'
+      this.chatCommands = []
+      this.entity = { id: 5 }
+    }
+    chat(cmd) {
+      this.chatCommands.push(cmd)
+    }
+  }
+
+  const bot = new MockBot()
+  autoAuth(bot, { enabled: true, password: 'trafficermc123a', delay: 10 })
+
+  // Trigger register
+  bot.emit('messagestr', 'Please register with /register <password>')
+
+  setTimeout(() => {
+    assert.strictEqual(bot.chatCommands[0], '/register trafficermc123a trafficermc123a')
+
+    // Server sends: You already have registered this username!
+    bot.emit('messagestr', 'You already have registered this username!')
+
+    setTimeout(() => {
+      assert.strictEqual(
+        bot.chatCommands[1],
+        '/login trafficermc123a',
+        'Should switch immediately to login upon receiving already registered error'
+      )
+      console.log('✓ Server feedback transition (register -> login) passed')
     }, 50)
   }, 50)
 }

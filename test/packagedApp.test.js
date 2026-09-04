@@ -6,7 +6,9 @@ console.log('--- Testing Packaged Executable Stability ---')
 
 const exePath = 'D:/TrafficerMC/dist/win-unpacked/TrafficerMC.exe'
 if (!fs.existsSync(exePath)) {
-  console.log('Skipping packaged executable test: dist/win-unpacked/TrafficerMC.exe not yet created.')
+  console.log(
+    'Skipping packaged executable test: dist/win-unpacked/TrafficerMC.exe not yet created.'
+  )
   process.exit(0)
 }
 
@@ -38,7 +40,9 @@ await new Promise((resolve, reject) => {
   setTimeout(() => {
     if (!finished) {
       finished = true
-      console.log(`✓ Process is running cleanly with PID ${proc.pid} without any uncaught exceptions!`)
+      console.log(
+        `✓ Process is running cleanly with PID ${proc.pid} without any uncaught exceptions!`
+      )
       try {
         process.kill(proc.pid)
       } catch (_) {}

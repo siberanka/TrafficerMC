@@ -15,6 +15,10 @@ async function swingArm(bot) {
   let arm = Math.random() < 0.5 ? 'right' : 'left'
   await bot.swingArm(arm)
 }
+function delayMs(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 async function start(bot) {
   if (bot.afk.stopping) {
     bot.afk.stopped = true
@@ -25,7 +29,15 @@ async function start(bot) {
     return
   }
   if (bot.entity.isInWater) bot.setControlState('jump', true)
-  await bot.afk[bot.afk.config.actions[Math.floor(Math.random() * 3)]]()
+  try {
+    const action = bot.afk.config.actions[Math.floor(Math.random() * bot.afk.config.actions.length)]
+    if (typeof bot.afk[action] === 'function') {
+      await bot.afk[action]()
+    }
+  } catch (_) {}
+
+  // Pacing delay between actions (1000ms - 2500ms) to prevent CPU/event loop saturation
+  await delayMs(Math.floor(Math.random() * 1500) + 1000)
   start(bot)
 }
 
@@ -37,15 +49,16 @@ function setOptions(bot) {
 function stop(bot) {
   bot.afk.stopping = true
   return new Promise((resolve) => {
-    if (!bot.afk.enabled) resolve('nothing to stop')
-    setInterval(() => {
+    if (!bot.afk.enabled) return resolve('nothing to stop')
+    const timer = setInterval(() => {
       if (bot.afk.stopped) {
+        clearInterval(timer)
         bot.afk.stopping = null
         bot.afk.stopped = null
         bot.afk.enabled = false
         resolve('stopped successfully')
       }
-    }, 500)
+    }, 250)
   })
 }
 

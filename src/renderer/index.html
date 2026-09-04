@@ -51,7 +51,16 @@
                 </div>
 
                 <div class="ui-field" id="usernameDiv">
-                  <div id="usernameSubDiv" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                  <div
+                    id="usernameSubDiv"
+                    style="
+                      width: 100%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      gap: 12px;
+                    "
+                  >
                     <span class="text-sm">Username:</span>
                     <input id="username" type="text" placeholder="username / token" />
                   </div>
@@ -72,9 +81,9 @@
                   <input id="joinMessage" type="text" placeholder="/register" />
                 </div>
 
-                <div class="flex" style="gap: 10px; margin-top: 8px;">
-                  <button id="btnStart" style="flex: 1;">Start Bots</button>
-                  <button id="btnStop" style="flex: 1;">Stop Bots</button>
+                <div class="flex" style="gap: 10px; margin-top: 8px">
+                  <button id="btnStart" style="flex: 1">Start Bots</button>
+                  <button id="btnStop" style="flex: 1">Stop Bots</button>
                 </div>
               </div>
 
@@ -96,7 +105,9 @@
 
                 <div class="ui-field" id="nameFileDiv" style="display: none">
                   <span class="text-sm">Name File:</span>
-                  <label id="nameFileLabel" class="button" style="flex: 1; text-align: center;">Choose a file</label>
+                  <label id="nameFileLabel" class="button" style="flex: 1; text-align: center"
+                    >Choose a file</label
+                  >
                 </div>
 
                 <div class="ui-field">
@@ -179,7 +190,9 @@
                   </select>
                 </div>
 
-                <div style="border-top: 1px solid var(--ev-border); padding-top: 10px; margin-top: 4px;">
+                <div
+                  style="border-top: 1px solid var(--ev-border); padding-top: 10px; margin-top: 4px"
+                >
                   <label class="containerCheckbox">
                     Auto Auth (AuthMe Reloaded)
                     <input id="autoAuth" type="checkbox" />
@@ -202,19 +215,29 @@
 
           <!-- 2. Botting Tab -->
           <div class="tab-pane" id="botting" style="display: none">
-            <div style="display: flex; gap: 16px; height: 100%;">
+            <div style="display: flex; gap: 16px; height: 100%">
               <!-- Column 1: Bot List & Subtabs -->
-              <div style="width: 200px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;">
-                <div class="ui-card" style="padding: 12px; gap: 8px;">
-                  <span class="text-sm" style="color: #ffffff;">Connected Bots</span>
+              <div
+                style="
+                  width: 200px;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 10px;
+                  flex-shrink: 0;
+                "
+              >
+                <div class="ui-card" style="padding: 12px; gap: 8px">
+                  <span class="text-sm" style="color: #ffffff">Connected Bots</span>
                   <ul id="botList" class="border"></ul>
-                  <div class="space-h" style="margin-top: 4px;">
+                  <div class="space-h" style="margin-top: 4px">
                     <label class="containerCheckbox">
                       Auto
                       <input id="autoSelect" type="checkbox" checked />
                       <span class="checkmark"></span>
                     </label>
-                    <button id="selectAll" style="padding: 4px 10px; font-size: 11px;">Select All</button>
+                    <button id="selectAll" style="padding: 4px 10px; font-size: 11px">
+                      Select All
+                    </button>
                   </div>
                 </div>
 
@@ -231,40 +254,230 @@
               </div>
 
               <!-- Column 2: Active Control Action Panel -->
-              <div class="ui-card" style="flex: 1; min-width: 240px; height: fit-content;">
+              <div class="ui-card" style="flex: 1; min-width: 240px; height: fit-content">
                 <!-- Controls -->
                 <div id="controls" class="control-tab" style="display: block">
                   <div class="ui-card-title">Bot Controls</div>
-                  <div style="margin-top: 12px;">
-                    <button id="btnDisconnect" style="background: #ef4444; border-color: #dc2626; color: #fff; width: 100%;">Disconnect Bot</button>
+                  <div style="margin-top: 12px">
+                    <button
+                      id="btnDisconnect"
+                      style="background: #ef4444; border-color: #dc2626; color: #fff; width: 100%"
+                    >
+                      Disconnect Bot
+                    </button>
                   </div>
                 </div>
 
-                <!-- Chat -->
-                <div id="chat" class="control-tab" style="display: none">
-                  <div class="ui-card-title">Chat & Spammer</div>
-                  <div class="flex-c" style="gap: 8px; margin-top: 10px;">
-                    <input id="chatMsg" type="text" placeholder="Message to send" />
-                    <button id="btnChat" style="width: 100%;">Send Message</button>
+                <!-- Chat & Spammer (LiquidLauncher Custom Spammer) -->
+                <div
+                  id="chat"
+                  class="control-tab"
+                  style="display: none; max-height: 480px; overflow-y: auto; padding-right: 4px"
+                >
+                  <div class="space-h" style="align-items: center; justify-content: space-between">
+                    <div class="ui-card-title">Chat & Spammer</div>
+                    <span id="spammerBadge" class="spammer-badge-idle">IDLE</span>
                   </div>
 
-                  <div style="border-top: 1px solid var(--ev-border); padding-top: 10px; margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
-                    <span class="text-sm">Spammer Options</span>
-                    <div class="ui-field">
-                      <span class="text-sm-2">Spam Delay:</span>
-                      <input id="spamDelay" type="number" placeholder="1000 (ms)" />
+                  <!-- Quick Message / Command -->
+                  <div class="flex-c" style="gap: 6px; margin-top: 10px">
+                    <div style="display: flex; gap: 6px">
+                      <input
+                        id="chatMsg"
+                        type="text"
+                        placeholder="Type message or /command..."
+                        style="flex: 1"
+                      />
+                      <button
+                        id="btnChat"
+                        style="
+                          white-space: nowrap;
+                          background: #0284c7;
+                          border-color: #0369a1;
+                          color: #fff;
+                        "
+                      >
+                        Send
+                      </button>
                     </div>
-                    <div class="space-h">
-                      <label class="containerCheckbox">
-                        Spam
-                        <input id="checkSpam" type="checkbox" />
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 2px 2px 0 2px;
+                      "
+                    >
+                      <label class="containerCheckbox" style="font-size: 11px; color: #94a3b8">
+                        Apply spammer formatting to manual input
+                        <input id="formatManualChat" type="checkbox" />
                         <span class="checkmark"></span>
                       </label>
-                      <label class="containerCheckbox">
-                        Bypass
-                        <input id="bypassChat" type="checkbox" />
-                        <span class="checkmark"></span>
-                      </label>
+                      <span class="text-sm-2" style="font-size: 10px; color: #64748b"
+                        >(Disabled by default)</span
+                      >
+                    </div>
+                  </div>
+
+                  <!-- LiquidLauncher Style Custom Spammer Panel -->
+                  <div
+                    style="
+                      border-top: 1px solid var(--ev-border);
+                      padding-top: 10px;
+                      margin-top: 12px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 10px;
+                    "
+                  >
+                    <span class="text-sm" style="font-weight: 700; color: var(--ev-c-accent)"
+                      >Liquid Custom Spammer</span
+                    >
+
+                    <!-- Delay Settings (Min - Max Range) -->
+                    <div class="ui-field" style="flex-direction: column; gap: 4px">
+                      <div class="space-h" style="justify-content: space-between">
+                        <span class="text-sm-2">Delay Range (ms):</span>
+                        <span id="delayDisplay" class="text-sm-2" style="color: #94a3b8"
+                          >1500 - 3000 ms</span
+                        >
+                      </div>
+                      <div style="display: flex; gap: 6px">
+                        <input
+                          id="spammerDelayMin"
+                          type="number"
+                          placeholder="Min (1500)"
+                          value="1500"
+                          style="flex: 1"
+                        />
+                        <input
+                          id="spammerDelayMax"
+                          type="number"
+                          placeholder="Max (3000)"
+                          value="3000"
+                          style="flex: 1"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- MPS (Messages Per Send) -->
+                    <div class="ui-field" style="justify-content: space-between">
+                      <span class="text-sm-2">MPS (Burst):</span>
+                      <select id="spammerMps" style="width: 120px">
+                        <option value="1">1 message</option>
+                        <option value="2">2 messages</option>
+                        <option value="3">3 messages</option>
+                        <option value="5">5 messages</option>
+                      </select>
+                    </div>
+
+                    <!-- Pattern & Converter -->
+                    <div class="ui-field" style="justify-content: space-between">
+                      <span class="text-sm-2">Pattern:</span>
+                      <select id="spammerPattern" style="width: 130px">
+                        <option value="random">Random</option>
+                        <option value="sequence">Sequence</option>
+                      </select>
+                    </div>
+
+                    <div class="ui-field" style="justify-content: space-between">
+                      <span class="text-sm-2">Message Converter:</span>
+                      <select id="messageConverter" style="width: 150px">
+                        <option value="none">None</option>
+                        <option value="leet">Leet (1337)</option>
+                        <option value="random_case">Random Case</option>
+                        <option value="random_space">Random Space</option>
+                      </select>
+                    </div>
+
+                    <!-- Custom Formatter / Anti-Spam Bypass -->
+                    <div
+                      style="
+                        background: rgba(255, 255, 255, 0.03);
+                        border: 1px solid var(--ev-border);
+                        border-radius: 6px;
+                        padding: 8px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                      "
+                    >
+                      <div
+                        class="space-h"
+                        style="justify-content: space-between; align-items: center"
+                      >
+                        <label class="containerCheckbox" style="font-size: 12px">
+                          Custom Formatter
+                          <input id="customFormatter" type="checkbox" checked />
+                          <span class="checkmark"></span>
+                        </label>
+                        <select
+                          id="formatterPosition"
+                          style="width: 130px; font-size: 11px; padding: 4px 6px"
+                        >
+                          <option value="suffix">Suffix [rAndOm]</option>
+                          <option value="prefix">Prefix [rAndOm]</option>
+                          <option value="both">Both [rAndOm]</option>
+                        </select>
+                      </div>
+                      <p class="text-sm-2" style="font-size: 10px; color: #64748b; margin: 0">
+                        Supports: {random}, {player}, {time}, {count}
+                      </p>
+                    </div>
+
+                    <!-- Multiple Messages List (Message Source) -->
+                    <div style="display: flex; flex-direction: column; gap: 6px">
+                      <span class="text-sm-2" style="font-weight: 600"
+                        >Message List (Setting Source):</span
+                      >
+                      <div style="display: flex; gap: 6px">
+                        <input
+                          id="newSpamMsg"
+                          type="text"
+                          placeholder="Add spam message value..."
+                          style="flex: 1"
+                        />
+                        <button
+                          id="btnAddSpamMsg"
+                          style="
+                            padding: 6px 12px;
+                            background: #334155;
+                            border-color: #475569;
+                            color: #fff;
+                          "
+                        >
+                          Add
+                        </button>
+                      </div>
+                      <div
+                        id="spammerMsgListContainer"
+                        style="
+                          max-height: 120px;
+                          overflow-y: auto;
+                          display: flex;
+                          flex-direction: column;
+                          gap: 4px;
+                          margin-top: 4px;
+                        "
+                      >
+                        <!-- Dynamically filled list -->
+                      </div>
+                    </div>
+
+                    <!-- Spammer Start / Stop Controls -->
+                    <div style="display: flex; gap: 6px; margin-top: 6px">
+                      <button
+                        id="btnStartSpammer"
+                        style="flex: 1; background: #10b981; border-color: #059669; color: #fff"
+                      >
+                        Start Spammer
+                      </button>
+                      <button
+                        id="btnStopSpammer"
+                        style="flex: 1; background: #ef4444; border-color: #dc2626; color: #fff"
+                      >
+                        Stop Spammer
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -272,7 +485,7 @@
                 <!-- Hotbar -->
                 <div id="hotbar" class="control-tab" style="display: none">
                   <div class="ui-card-title">Hotbar Controls</div>
-                  <div class="ui-field" style="margin-top: 10px;">
+                  <div class="ui-field" style="margin-top: 10px">
                     <span class="text-sm">Slot:</span>
                     <select id="hotbarSlot">
                       <option value="0">Slot 1</option>
@@ -286,42 +499,42 @@
                       <option value="8">Slot 9</option>
                     </select>
                   </div>
-                  <div class="flex" style="gap: 8px; margin-top: 12px;">
-                    <button id="btnSetHotbar" style="flex: 1;">Equip Slot</button>
-                    <button id="btnUseheld" style="flex: 1;">Use Item</button>
+                  <div class="flex" style="gap: 8px; margin-top: 12px">
+                    <button id="btnSetHotbar" style="flex: 1">Equip Slot</button>
+                    <button id="btnUseheld" style="flex: 1">Use Item</button>
                   </div>
                 </div>
 
                 <!-- Inventory -->
                 <div id="inventory" class="control-tab" style="display: none">
                   <div class="ui-card-title">Inventory Manager</div>
-                  <div class="ui-field" style="margin-top: 10px;">
+                  <div class="ui-field" style="margin-top: 10px">
                     <span class="text-sm">Slot ID:</span>
                     <input id="invSlot" type="number" placeholder="Slot number" />
                   </div>
-                  <div class="flex-c" style="gap: 8px; margin-top: 10px;">
+                  <div class="flex-c" style="gap: 8px; margin-top: 10px">
                     <span class="text-sm-2">Click Window:</span>
-                    <div class="flex" style="gap: 8px;">
-                      <button id="btnWinClickLeft" style="flex: 1;">Left Click</button>
-                      <button id="btnWinClickRight" style="flex: 1;">Right Click</button>
+                    <div class="flex" style="gap: 8px">
+                      <button id="btnWinClickLeft" style="flex: 1">Left Click</button>
+                      <button id="btnWinClickRight" style="flex: 1">Right Click</button>
                     </div>
                   </div>
-                  <div class="flex-c" style="gap: 8px; margin-top: 10px;">
+                  <div class="flex-c" style="gap: 8px; margin-top: 10px">
                     <span class="text-sm-2">Drop Items:</span>
-                    <div class="flex" style="gap: 8px;">
-                      <button id="btnDropSlot" style="flex: 1;">Drop Slot</button>
-                      <button id="btnDropAll" style="flex: 1;">Drop All</button>
+                    <div class="flex" style="gap: 8px">
+                      <button id="btnDropSlot" style="flex: 1">Drop Slot</button>
+                      <button id="btnDropAll" style="flex: 1">Drop All</button>
                     </div>
                   </div>
-                  <div style="margin-top: 12px;">
-                    <button id="btnCloseWindow" style="width: 100%;">Close Window</button>
+                  <div style="margin-top: 12px">
+                    <button id="btnCloseWindow" style="width: 100%">Close Window</button>
                   </div>
                 </div>
 
                 <!-- Move -->
                 <div id="move" class="control-tab" style="display: none">
                   <div class="ui-card-title">Movement</div>
-                  <div class="ui-field" style="margin-top: 10px;">
+                  <div class="ui-field" style="margin-top: 10px">
                     <span class="text-sm">Action:</span>
                     <select id="moveType">
                       <option value="forward">Forward</option>
@@ -333,17 +546,17 @@
                       <option value="sneak">Sneak</option>
                     </select>
                   </div>
-                  <div class="flex" style="gap: 8px; margin-top: 12px;">
-                    <button id="btnStartMove" style="flex: 1;">Start</button>
-                    <button id="btnStopMove" style="flex: 1;">Stop</button>
-                    <button id="btnResetMove" style="flex: 1;">Reset</button>
+                  <div class="flex" style="gap: 8px; margin-top: 12px">
+                    <button id="btnStartMove" style="flex: 1">Start</button>
+                    <button id="btnStopMove" style="flex: 1">Stop</button>
+                    <button id="btnResetMove" style="flex: 1">Reset</button>
                   </div>
                 </div>
 
                 <!-- Look -->
                 <div id="look" class="control-tab" style="display: none">
                   <div class="ui-card-title">Look Direction</div>
-                  <div class="ui-field" style="margin-top: 10px;">
+                  <div class="ui-field" style="margin-top: 10px">
                     <span class="text-sm">Direction:</span>
                     <select id="lookDirection">
                       <option value="0">North</option>
@@ -352,24 +565,41 @@
                       <option value="1.5">West</option>
                     </select>
                   </div>
-                  <div style="margin-top: 12px;">
-                    <button id="btnLook" style="width: 100%;">Look Direction</button>
+                  <div style="margin-top: 12px">
+                    <button id="btnLook" style="width: 100%">Look Direction</button>
                   </div>
                 </div>
 
                 <!-- AntiAFK -->
                 <div id="antiafk" class="control-tab" style="display: none">
                   <div class="ui-card-title">Anti-AFK Module</div>
-                  <div class="flex" style="gap: 8px; margin-top: 14px;">
-                    <button id="btnAfkOn" style="flex: 1; background: #10b981; border-color: #059669; color: #fff;">Start Anti-AFK</button>
-                    <button id="btnAfkOff" style="flex: 1; background: #ef4444; border-color: #dc2626; color: #fff;">Stop Anti-AFK</button>
+                  <div class="flex" style="gap: 8px; margin-top: 14px">
+                    <button
+                      id="btnAfkOn"
+                      style="flex: 1; background: #10b981; border-color: #059669; color: #fff"
+                    >
+                      Start Anti-AFK
+                    </button>
+                    <button
+                      id="btnAfkOff"
+                      style="flex: 1; background: #ef4444; border-color: #dc2626; color: #fff"
+                    >
+                      Stop Anti-AFK
+                    </button>
                   </div>
                 </div>
 
                 <!-- KillAura -->
                 <div id="killaura" class="control-tab" style="display: none">
                   <div class="ui-card-title">KillAura Settings</div>
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: 1fr 1fr;
+                      gap: 8px;
+                      margin-top: 10px;
+                    "
+                  >
                     <label class="containerCheckbox">
                       Player
                       <input id="targetPlayer" type="checkbox" />
@@ -392,21 +622,31 @@
                     </label>
                   </div>
 
-                  <div class="ui-field" style="margin-top: 10px;">
+                  <div class="ui-field" style="margin-top: 10px">
                     <span class="text-sm-2">Attack Delay:</span>
                     <input id="killauraDelay" type="number" placeholder="10 (ticks)" />
                   </div>
 
-                  <div class="slidecontainer space-h" style="margin-top: 8px;">
+                  <div class="slidecontainer space-h" style="margin-top: 8px">
                     <span class="text-sm-2">Range:</span>
-                    <div class="flex" style="align-items: center; gap: 8px; flex: 1; margin-left: 12px;">
+                    <div
+                      class="flex"
+                      style="align-items: center; gap: 8px; flex: 1; margin-left: 12px"
+                    >
                       <span class="text-sm-2">1</span>
-                      <input id="killauraRange" type="range" min="1" max="6" value="1" class="slider" />
+                      <input
+                        id="killauraRange"
+                        type="range"
+                        min="1"
+                        max="6"
+                        value="1"
+                        class="slider"
+                      />
                       <span class="text-sm-2">6</span>
                     </div>
                   </div>
 
-                  <div class="space-h" style="margin-top: 10px;">
+                  <div class="space-h" style="margin-top: 10px">
                     <label class="containerCheckbox">
                       Rotate Head
                       <input id="killauraRotate" type="checkbox" />
@@ -422,12 +662,28 @@
               </div>
 
               <!-- Column 3: Live Chat Log -->
-              <div class="ui-card" style="flex: 1.2; min-width: 280px; display: flex; flex-direction: column;">
-                <div class="ui-card-title">
-                  <span>Server & Bot Chat Log</span>
+              <div
+                class="ui-card"
+                style="flex: 1.2; min-width: 280px; display: flex; flex-direction: column"
+              >
+                <div
+                  class="space-h"
+                  style="align-items: center; justify-content: space-between; margin-bottom: 6px"
+                >
+                  <div class="ui-card-title" style="margin: 0">
+                    <span>Server Console</span>
+                  </div>
+                  <div
+                    id="consoleLeadBadge"
+                    class="console-lead-badge idle"
+                    title="Active synchronized console stream lead bot"
+                  >
+                    <span class="console-lead-dot"></span>
+                    <span id="consoleLeadText">Console: Idle</span>
+                  </div>
                 </div>
-                <ul id="chatBox" style="flex: 1;"></ul>
-                <div class="space-h" style="margin-top: 8px;">
+                <ul id="chatBox" style="flex: 1"></ul>
+                <div class="space-h" style="margin-top: 8px">
                   <label class="containerCheckbox">
                     Show Chat
                     <input id="enableChat" type="checkbox" checked />
@@ -438,7 +694,7 @@
                     <input id="autoScrollChat" type="checkbox" checked />
                     <span class="checkmark"></span>
                   </label>
-                  <button id="clearChat" style="padding: 4px 10px; font-size: 11px;">Clear</button>
+                  <button id="clearChat" style="padding: 4px 10px; font-size: 11px">Clear</button>
                 </div>
               </div>
             </div>
@@ -447,37 +703,489 @@
           <!-- 3. Scripting Tab -->
           <div class="tab-pane" id="scripting" style="display: none">
             <div class="ui-grid-2">
+              <!-- Left: Script Editor -->
               <div class="ui-card">
-                <div class="ui-card-title">Script Editor</div>
+                <div class="space-h" style="align-items: center; justify-content: space-between">
+                  <div class="ui-card-title" style="margin: 0">Script Editor</div>
+                  <span class="text-sm-2" style="color: #64748b">Line-by-line automation</span>
+                </div>
                 <textarea
                   id="scriptText"
                   class="textbox"
-                  style="height: 280px;"
+                  style="
+                    height: 200px;
+                    font-family: 'JetBrains Mono', 'Consolas', monospace;
+                    font-size: 11.5px;
+                    line-height: 1.45;
+                  "
                   spellcheck="false"
-                  placeholder="chat /help&#10;wait 1000&#10;chat Hello from TrafficerMC!"
+                  placeholder="# Example Script:&#10;/login 123456&#10;wait 1000&#10;/spawn&#10;chat Hello from TrafficerMC!&#10;hotbar 0&#10;useheld"
                 ></textarea>
-                <div class="space-h" style="margin-top: 6px;">
-                  <div class="flex" style="gap: 8px;">
-                    <button id="runScript" style="background: #10b981; border-color: #059669; color: #fff;">Run Script</button>
-                    <button id="stopScript" style="background: #ef4444; border-color: #dc2626; color: #fff;">Stop</button>
+                <div class="space-h" style="margin-top: 4px">
+                  <div class="flex" style="gap: 8px">
+                    <button
+                      id="runScript"
+                      style="background: #10b981; border-color: #059669; color: #fff"
+                    >
+                      Run Script
+                    </button>
+                    <button
+                      id="stopScript"
+                      style="background: #ef4444; border-color: #dc2626; color: #fff"
+                    >
+                      Stop
+                    </button>
                   </div>
                   <button id="clearScript">Clear</button>
                 </div>
+
+                <!-- Quick Preset Templates -->
+                <div
+                  style="
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    gap: 6px;
+                    padding-top: 8px;
+                    border-top: 1px solid var(--ev-border);
+                  "
+                >
+                  <span class="text-sm-2" style="color: #94a3b8; font-weight: 600"
+                    >Hazır Şablonlar:</span
+                  >
+                  <button
+                    type="button"
+                    class="script-preset-btn"
+                    data-template="/login 123456&#10;wait 1000&#10;/spawn"
+                  >
+                    Login
+                  </button>
+                  <button
+                    type="button"
+                    class="script-preset-btn"
+                    data-template="/register 123456 123456&#10;wait 1000&#10;/spawn"
+                  >
+                    Register
+                  </button>
+                  <button
+                    type="button"
+                    class="script-preset-btn"
+                    data-template="startmove forward&#10;wait 2000&#10;jump&#10;wait 1000&#10;resetmove"
+                  >
+                    Yürü & Zıpla
+                  </button>
+                  <button
+                    type="button"
+                    class="script-preset-btn"
+                    data-template="chat Selam sunucu!&#10;wait 1500&#10;chat TrafficerMC bot aktif."
+                  >
+                    Chat Spam
+                  </button>
+                  <button
+                    type="button"
+                    class="script-preset-btn"
+                    data-template="hotbar 0&#10;useheld&#10;wait 500&#10;dropall"
+                  >
+                    Eşya Kullan & At
+                  </button>
+                </div>
               </div>
 
+              <!-- Right: Script Options -->
               <div class="ui-card">
-                <div class="ui-card-title">Script Options</div>
-                <div class="flex-c" style="gap: 12px; margin-top: 6px;">
-                  <label class="containerCheckbox">
-                    Run on connect
-                    <input id="runOnConnect" type="checkbox" />
-                    <span class="checkmark"></span>
-                  </label>
-                  <label class="containerCheckbox">
-                    Run on spawn
-                    <input id="runOnSpawn" type="checkbox" />
-                    <span class="checkmark"></span>
-                  </label>
+                <div class="ui-card-title">Script Seçenekleri</div>
+                <div class="flex-c" style="gap: 12px; margin-top: 4px">
+                  <div>
+                    <label class="containerCheckbox">
+                      Run on connect
+                      <input id="runOnConnect" type="checkbox" />
+                      <span class="checkmark"></span>
+                    </label>
+                    <p class="text-sm-2" style="color: #64748b; margin: 2px 0 0 26px">
+                      Bot sunucu soketine bağlandığı an scripti otomatik başlatır.
+                    </p>
+                  </div>
+                  <div>
+                    <label class="containerCheckbox">
+                      Run on spawn
+                      <input id="runOnSpawn" type="checkbox" />
+                      <span class="checkmark"></span>
+                    </label>
+                    <p class="text-sm-2" style="color: #64748b; margin: 2px 0 0 26px">
+                      Bot sunucuda doğduğu (dünya yüklendiği) an scripti başlatır.
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  style="
+                    background: rgba(15, 23, 42, 0.4);
+                    border: 1px solid var(--ev-border);
+                    border-radius: 6px;
+                    padding: 10px;
+                    margin-top: 8px;
+                  "
+                >
+                  <span class="text-sm-2" style="color: var(--ev-c-accent); font-weight: 700"
+                    >💡 Hızlı Kullanım:</span
+                  >
+                  <p class="text-sm-2" style="color: #94a3b8; margin-top: 4px; line-height: 1.4">
+                    Alttaki komut kılavuzundaki herhangi bir komuta veya <b>+ Ekle</b> butonuna
+                    tıklayarak doğrudan editöre ekleyebilirsiniz. <code>#</code> veya
+                    <code>//</code>
+                    ile başlayan satırlar yorum satırıdır.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Full-Width Card: Scripting Wiki & Command Reference -->
+            <div class="ui-card" style="margin-top: 14px">
+              <div
+                class="space-h"
+                style="
+                  align-items: center;
+                  justify-content: space-between;
+                  flex-wrap: wrap;
+                  gap: 8px;
+                "
+              >
+                <div
+                  class="ui-card-title"
+                  style="margin: 0; display: flex; align-items: center; gap: 6px"
+                >
+                  <span>📖 Scripting Wiki & Komut Kılavuzu</span>
+                </div>
+                <input
+                  id="wikiSearchInput"
+                  type="text"
+                  placeholder="Komut ara (/login, wait, move, hotbar...)"
+                  style="width: 220px; padding: 4px 10px; font-size: 11px"
+                />
+              </div>
+
+              <!-- Wiki Grid of Command Cards -->
+              <div class="wiki-grid" id="wikiCommandGrid">
+                <!-- 1. Chat & Commands -->
+                <div class="wiki-card" data-cmd="/komut command chat say msg login register spawn">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="/login 123456">/komut</span>
+                    <span class="wiki-category-tag" style="color: #38bdf8">Sohbet & Komut</span>
+                  </div>
+                  <span class="wiki-desc"
+                    >Doğrudan sunucu komutu gönderir. <code>/</code> ile başlayan her satır otomatik
+                    komuttur.</span
+                  >
+                  <div class="wiki-example">
+                    <code>/login 123456</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="/login 123456">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="command cmd /spawn">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="command spawn"
+                      >command &lt;komut&gt;</span
+                    >
+                    <span class="wiki-category-tag" style="color: #38bdf8">Komut</span>
+                  </div>
+                  <span class="wiki-desc">Belirtilen komutu sunucuya iletir.</span>
+                  <div class="wiki-example">
+                    <code>command spawn</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="command spawn">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="chat say msg mesaj">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="chat Selamlar!"
+                      >chat &lt;mesaj&gt;</span
+                    >
+                    <span class="wiki-category-tag" style="color: #38bdf8">Sohbet</span>
+                  </div>
+                  <span class="wiki-desc"
+                    >Genel sohbete mesaj gönderir (<code>say</code> olarak da çalışır).</span
+                  >
+                  <div class="wiki-example">
+                    <code>chat Hello world!</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="chat Hello world!">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 2. Timing -->
+                <div class="wiki-card" data-cmd="wait delay sleep bekle">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="wait 1000"
+                      >wait / delay &lt;ms&gt;</span
+                    >
+                    <span class="wiki-category-tag" style="color: #fbbf24">Zamanlama</span>
+                  </div>
+                  <span class="wiki-desc"
+                    >Belirtilen milisaniye kadar bekler (1000 ms = 1 saniye).</span
+                  >
+                  <div class="wiki-example">
+                    <code>wait 1500</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="wait 1500">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 3. Inventory -->
+                <div class="wiki-card" data-cmd="hotbar sethotbar slot">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="hotbar 0">hotbar &lt;0-8&gt;</span>
+                    <span class="wiki-category-tag" style="color: #a78bfa">Envanter</span>
+                  </div>
+                  <span class="wiki-desc"
+                    >Seçili el hotbar slotunu değiştirir (0: 1. slot, 8: 9. slot).</span
+                  >
+                  <div class="wiki-example">
+                    <code>hotbar 0</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="hotbar 0">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="useheld use activate sag tıkla">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="useheld">useheld / use</span>
+                    <span class="wiki-category-tag" style="color: #a78bfa">Envanter</span>
+                  </div>
+                  <span class="wiki-desc"
+                    >Eldeki eşyayı sağ tıklar / kullanır (yemek yer, yay çeker vs).</span
+                  >
+                  <div class="wiki-example">
+                    <code>useheld</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="useheld">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="winclick sandık menü gui slot">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="winclick 10 0"
+                      >winclick &lt;slot&gt; [tuş]</span
+                    >
+                    <span class="wiki-category-tag" style="color: #a78bfa">Envanter</span>
+                  </div>
+                  <span class="wiki-desc"
+                    >Açık sandık / GUI menüsünde slota tıklar (0: Sol tık, 1: Sağ tık).</span
+                  >
+                  <div class="wiki-example">
+                    <code>winclick 10 0</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="winclick 10 0">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="closewindow sandık gui kapat">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="closewindow">closewindow</span>
+                    <span class="wiki-category-tag" style="color: #a78bfa">Envanter</span>
+                  </div>
+                  <span class="wiki-desc"
+                    >Açık olan sandık, envanter veya menü penceresini kapatır.</span
+                  >
+                  <div class="wiki-example">
+                    <code>closewindow</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="closewindow">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="drop at yere at slot">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="drop 36">drop &lt;slot&gt;</span>
+                    <span class="wiki-category-tag" style="color: #a78bfa">Envanter</span>
+                  </div>
+                  <span class="wiki-desc">Belirtilen envanter slotundaki eşyayı yere atar.</span>
+                  <div class="wiki-example">
+                    <code>drop 36</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="drop 36">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="dropall tümünü at bosalt">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="dropall">dropall</span>
+                    <span class="wiki-category-tag" style="color: #a78bfa">Envanter</span>
+                  </div>
+                  <span class="wiki-desc">Botun envanterindeki tüm eşyaları yere fırlatır.</span>
+                  <div class="wiki-example">
+                    <code>dropall</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="dropall">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 4. Movement -->
+                <div class="wiki-card" data-cmd="startmove yürü ileri kos forward back">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="startmove forward"
+                      >startmove &lt;yön&gt;</span
+                    >
+                    <span class="wiki-category-tag" style="color: #34d399">Hareket</span>
+                  </div>
+                  <span class="wiki-desc"
+                    >Sürekli hareket başlatır (<code>forward</code>, <code>back</code>,
+                    <code>left</code>, <code>right</code>, <code>sprint</code>,
+                    <code>jump</code>).</span
+                  >
+                  <div class="wiki-example">
+                    <code>startmove forward</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="startmove forward">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="stopmove dur forward back">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="stopmove forward"
+                      >stopmove &lt;yön&gt;</span
+                    >
+                    <span class="wiki-category-tag" style="color: #34d399">Hareket</span>
+                  </div>
+                  <span class="wiki-desc">Belirtilen yöndeki hareketi durdurur.</span>
+                  <div class="wiki-example">
+                    <code>stopmove forward</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="stopmove forward">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="resetmove stop dur sıfırla">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="resetmove">resetmove / stop</span>
+                    <span class="wiki-category-tag" style="color: #34d399">Hareket</span>
+                  </div>
+                  <span class="wiki-desc">Botun tüm hareket tuş durumlarını anında sıfırlar.</span>
+                  <div class="wiki-example">
+                    <code>resetmove</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="resetmove">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="jump zıpla hopla">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="jump">jump</span>
+                    <span class="wiki-category-tag" style="color: #34d399">Hareket</span>
+                  </div>
+                  <span class="wiki-desc">Botun anlık olarak zıplamasını sağlar (350 ms).</span>
+                  <div class="wiki-example">
+                    <code>jump</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="jump">+ Ekle</button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="sneak unsneak eğil shift">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="sneak">sneak / unsneak</span>
+                    <span class="wiki-category-tag" style="color: #34d399">Hareket</span>
+                  </div>
+                  <span class="wiki-desc">Eğilme (sneak/shift) durumunu açar veya kapatır.</span>
+                  <div class="wiki-example">
+                    <code>sneak</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="sneak">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="look bak acı pitch yaw">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="look 180 0"
+                      >look &lt;yaw&gt; [pitch]</span
+                    >
+                    <span class="wiki-category-tag" style="color: #34d399">Hareket</span>
+                  </div>
+                  <span class="wiki-desc"
+                    >Botun bakış yönünü derece cinsinden ayarlar (0: Güney, 180: Kuzey).</span
+                  >
+                  <div class="wiki-example">
+                    <code>look 180 0</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="look 180 0">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 5. Combat & System -->
+                <div class="wiki-card" data-cmd="afk antiafk afkon afkoff">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="afk on">afk &lt;on | off&gt;</span>
+                    <span class="wiki-category-tag" style="color: #f43f5e">Sistem</span>
+                  </div>
+                  <span class="wiki-desc">Anti-AFK modunu başlatır veya durdurur.</span>
+                  <div class="wiki-example">
+                    <code>afk on</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="afk on">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="respawn yeniden doğ canlan">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="respawn">respawn</span>
+                    <span class="wiki-category-tag" style="color: #f43f5e">Sistem</span>
+                  </div>
+                  <span class="wiki-desc">Bot öldüğünde yeniden doğmasını (respawn) sağlar.</span>
+                  <div class="wiki-example">
+                    <code>respawn</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="respawn">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="hit attack saldır vur">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="hit 3.5">hit [mesafe]</span>
+                    <span class="wiki-category-tag" style="color: #f43f5e">Savaş</span>
+                  </div>
+                  <span class="wiki-desc"
+                    >Yakındaki en yakın canlıya saldırır (varsayılan mesafe 3.5 blok).</span
+                  >
+                  <div class="wiki-example">
+                    <code>hit 3.5</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="hit 3.5">
+                      + Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div class="wiki-card" data-cmd="disconnect quit cık ayrıl">
+                  <div class="wiki-card-header">
+                    <span class="wiki-cmd-badge" data-insert="disconnect">disconnect / quit</span>
+                    <span class="wiki-category-tag" style="color: #f43f5e">Sistem</span>
+                  </div>
+                  <span class="wiki-desc"
+                    >Botun sunucu bağlantısını temiz şekilde sonlandırır.</span
+                  >
+                  <div class="wiki-example">
+                    <code>disconnect</code>
+                    <button type="button" class="wiki-insert-btn" data-insert="disconnect">
+                      + Ekle
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -490,9 +1198,9 @@
               <div class="ui-card">
                 <div class="ui-card-title">
                   <span>Proxy List</span>
-                  <div class="flex" style="align-items: center; gap: 8px;">
+                  <div class="flex" style="align-items: center; gap: 8px">
                     <span class="text-sm">Type:</span>
-                    <select id="proxyType" style="width: 100px;">
+                    <select id="proxyType" style="width: 100px">
                       <option value="none">None</option>
                       <option value="socks4">SOCKS4</option>
                       <option value="socks5">SOCKS5</option>
@@ -504,12 +1212,12 @@
                 <textarea
                   id="proxyList"
                   class="textbox"
-                  style="height: 240px;"
+                  style="height: 240px"
                   placeholder="ip:port&#10;ip:port:user:pass"
                 ></textarea>
 
-                <div class="space-h" style="margin-top: 4px;">
-                  <div class="flex" style="gap: 8px;">
+                <div class="space-h" style="margin-top: 4px">
+                  <div class="flex" style="gap: 8px">
                     <button id="proxyTestStart">Test Proxies</button>
                     <button id="proxyTestStop">Stop</button>
                   </div>
@@ -542,27 +1250,52 @@
                   </select>
                 </div>
 
-                <details style="cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid var(--ev-border); border-radius: 6px; padding: 6px 10px;">
-                  <summary class="text-sm-2" style="color: var(--ev-c-accent); font-weight: 600;">Custom Raw URLs (+)</summary>
+                <details
+                  style="
+                    cursor: pointer;
+                    background: rgba(255, 255, 255, 0.03);
+                    border: 1px solid var(--ev-border);
+                    border-radius: 6px;
+                    padding: 6px 10px;
+                  "
+                >
+                  <summary class="text-sm-2" style="color: var(--ev-c-accent); font-weight: 600">
+                    Custom Raw URLs (+)
+                  </summary>
                   <textarea
                     id="customProxyUrls"
                     class="textbox"
-                    style="width: 100%; height: 55px; font-size: 11px; margin-top: 6px; resize: vertical;"
+                    style="
+                      width: 100%;
+                      height: 55px;
+                      font-size: 11px;
+                      margin-top: 6px;
+                      resize: vertical;
+                    "
                     placeholder="https://raw.github.../list.txt (1 URL per line)"
                   ></textarea>
                 </details>
 
-                <div class="flex" style="gap: 8px;">
-                  <button id="proxyDownloadWeb" style="flex: 1.5; font-weight: 700;">Download Web List</button>
-                  <button id="proxyScrape" style="flex: 1;">Scrape</button>
-                  <button id="proxyClearDupe" style="flex: 1;">Clear Dupes</button>
+                <div class="flex" style="gap: 8px">
+                  <button id="proxyDownloadWeb" style="flex: 1.5; font-weight: 700">
+                    Download Web List
+                  </button>
+                  <button id="proxyScrape" style="flex: 1">Scrape</button>
+                  <button id="proxyClearDupe" style="flex: 1">Clear Dupes</button>
                 </div>
 
-                <div class="ui-field" style="margin-top: 4px;">
+                <div class="ui-field" style="margin-top: 4px">
                   <span class="text-sm-2">Proxy per bot:</span>
-                  <div class="flex" style="align-items: center; gap: 8px; flex: 1;">
+                  <div class="flex" style="align-items: center; gap: 8px; flex: 1">
                     <span class="text-sm-2">1</span>
-                    <input id="proxyPerBot" type="range" min="1" max="10" value="1" class="slider" />
+                    <input
+                      id="proxyPerBot"
+                      type="range"
+                      min="1"
+                      max="10"
+                      value="1"
+                      class="slider"
+                    />
                     <span class="text-sm-2">10</span>
                   </div>
                 </div>
@@ -573,11 +1306,21 @@
                     <input id="randomizeOrder" type="checkbox" />
                     <span class="checkmark"></span>
                   </label>
-                  <div class="flex" style="gap: 8px; align-items: center;">
+                  <div class="flex" style="gap: 8px; align-items: center">
                     <span class="text-sm-2">Delay:</span>
-                    <input id="proxyCheckDelay" type="number" style="width: 70px;" placeholder="100ms" />
+                    <input
+                      id="proxyCheckDelay"
+                      type="number"
+                      style="width: 70px"
+                      placeholder="100ms"
+                    />
                     <span class="text-sm-2">Timeout:</span>
-                    <input id="proxyCheckTimeout" type="number" style="width: 70px;" placeholder="5000ms" />
+                    <input
+                      id="proxyCheckTimeout"
+                      type="number"
+                      style="width: 70px"
+                      placeholder="5000ms"
+                    />
                   </div>
                 </div>
 
@@ -590,7 +1333,9 @@
                     <input id="autoScrollProxy" type="checkbox" checked />
                     <span class="checkmark"></span>
                   </label>
-                  <button id="proxyLogClear" style="padding: 3px 8px; font-size: 11px;">Clear Log</button>
+                  <button id="proxyLogClear" style="padding: 3px 8px; font-size: 11px">
+                    Clear Log
+                  </button>
                 </div>
               </div>
             </div>
@@ -598,21 +1343,30 @@
 
           <!-- 5. Webhook Tab -->
           <div class="tab-pane" id="webhook" style="display: none">
-            <div class="ui-card" style="max-width: 600px; margin: 0 auto;">
+            <div class="ui-card" style="max-width: 600px; margin: 0 auto">
               <div class="ui-card-title">Discord Webhook Integration</div>
-              <div class="ui-field" style="margin-top: 8px;">
-                <label class="containerCheckbox" style="min-width: 110px;">
+              <div class="ui-field" style="margin-top: 8px">
+                <label class="containerCheckbox" style="min-width: 110px">
                   Enable:
                   <input id="enableWebhook" type="checkbox" />
                   <span class="checkmark"></span>
                 </label>
-                <input id="webhookLink" type="text" placeholder="https://discord.com/api/webhooks/..." style="flex: 1;" />
+                <input
+                  id="webhookLink"
+                  type="text"
+                  placeholder="https://discord.com/api/webhooks/..."
+                  style="flex: 1"
+                />
                 <button id="webhookTest">Test</button>
               </div>
 
-              <div style="border-top: 1px solid var(--ev-border); padding-top: 12px; margin-top: 12px;">
-                <span class="text-sm" style="display: block; margin-bottom: 8px;">Webhook Log Channels:</span>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <div
+                style="border-top: 1px solid var(--ev-border); padding-top: 12px; margin-top: 12px"
+              >
+                <span class="text-sm" style="display: block; margin-bottom: 8px"
+                  >Webhook Log Channels:</span
+                >
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
                   <label class="containerCheckbox">
                     Actions
                     <input id="actionLogWebhook" type="checkbox" />
@@ -655,14 +1409,47 @@
 
           <!-- 6. About Tab -->
           <div class="tab-pane" id="about" style="display: none">
-            <div class="ui-card" style="max-width: 480px; margin: 30px auto; text-align: center; align-items: center; gap: 14px;">
-              <img src="./assets/icons/icon.png" style="width: 72px; height: 72px;" alt="TrafficerMC" />
-              <span class="text" style="font-size: 24px; color: #ffffff;">TrafficerMC</span>
-              <p class="tip">High-performance Minecraft botting, stress-testing, and proxy orchestration tool.</p>
-              <div class="flex" style="gap: 12px; margin-top: 10px;">
-                <a href="https://discord.com/invite/uFpaAZdVgS" target="_blank" rel="noreferrer" class="button">Discord</a>
-                <a href="https://youtube.com/rattleshyper" target="_blank" rel="noreferrer" class="button">YouTube</a>
-                <a href="https://github.com/siberanka/TrafficerMC" target="_blank" rel="noreferrer" class="button">GitHub (siberanka)</a>
+            <div
+              class="ui-card"
+              style="
+                max-width: 480px;
+                margin: 30px auto;
+                text-align: center;
+                align-items: center;
+                gap: 14px;
+              "
+            >
+              <img
+                src="./assets/icons/icon.png"
+                style="width: 72px; height: 72px"
+                alt="TrafficerMC"
+              />
+              <span class="text" style="font-size: 24px; color: #ffffff">TrafficerMC</span>
+              <p class="tip">
+                High-performance Minecraft botting, stress-testing, and proxy orchestration tool.
+              </p>
+              <div class="flex" style="gap: 12px; margin-top: 10px">
+                <a
+                  href="https://discord.com/invite/uFpaAZdVgS"
+                  target="_blank"
+                  rel="noreferrer"
+                  class="button"
+                  >Discord</a
+                >
+                <a
+                  href="https://youtube.com/rattleshyper"
+                  target="_blank"
+                  rel="noreferrer"
+                  class="button"
+                  >YouTube</a
+                >
+                <a
+                  href="https://github.com/siberanka/TrafficerMC"
+                  target="_blank"
+                  rel="noreferrer"
+                  class="button"
+                  >GitHub (siberanka)</a
+                >
               </div>
             </div>
           </div>
@@ -676,7 +1463,7 @@
       <div id="settings" class="settings-tab" style="display: none">
         <div class="settings-tab-content">
           <img id="closeSettings" src="./assets/icons/x.svg" class="icon-sm" title="Close" />
-          <div class="ui-card-title" style="margin-bottom: 8px;">Settings & Preferences</div>
+          <div class="ui-card-title" style="margin-bottom: 8px">Settings & Preferences</div>
 
           <span class="text-sm">Connection Timers</span>
           <div class="ui-field">
@@ -685,7 +1472,7 @@
               <input id="isLinear" type="checkbox" />
               <span class="checkmark"></span>
             </label>
-            <input id="linearDelay" type="number" style="width: 140px;" placeholder="100 (ms)" />
+            <input id="linearDelay" type="number" style="width: 140px" placeholder="100 (ms)" />
           </div>
 
           <div class="ui-field">
@@ -694,12 +1481,17 @@
               <input id="autoReconnect" type="checkbox" />
               <span class="checkmark"></span>
             </label>
-            <input id="reconnectDelay" type="number" style="width: 140px;" placeholder="Delay 100 (ms)" />
+            <input
+              id="reconnectDelay"
+              type="number"
+              style="width: 140px"
+              placeholder="Delay 100 (ms)"
+            />
           </div>
 
-          <div style="border-top: 1px solid var(--ev-border); padding-top: 8px; margin-top: 4px;">
-            <span class="text-sm" style="display: block; margin-bottom: 6px;">Chat Logs</span>
-            <div class="flex" style="gap: 16px;">
+          <div style="border-top: 1px solid var(--ev-border); padding-top: 8px; margin-top: 4px">
+            <span class="text-sm" style="display: block; margin-bottom: 6px">Chat Logs</span>
+            <div class="flex" style="gap: 16px">
               <label class="containerCheckbox">
                 Actions
                 <input id="actionLogChat" type="checkbox" checked />
@@ -713,9 +1505,23 @@
             </div>
           </div>
 
-          <div style="border-top: 1px solid var(--ev-border); padding-top: 10px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center;">
+          <div
+            style="
+              border-top: 1px solid var(--ev-border);
+              padding-top: 10px;
+              margin-top: 4px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
             <span class="text-sm">Reset Configuration:</span>
-            <button id="resetConfig" style="background: #ef4444; border-color: #dc2626; color: #fff;">Reset Config</button>
+            <button
+              id="resetConfig"
+              style="background: #ef4444; border-color: #dc2626; color: #fff"
+            >
+              Reset Config
+            </button>
           </div>
         </div>
       </div>
@@ -738,7 +1544,12 @@
           </div>
         </div>
         <div>
-          <img id="openSettings" src="./assets/icons/settings.svg" class="icon-sm" title="Settings" />
+          <img
+            id="openSettings"
+            src="./assets/icons/settings.svg"
+            class="icon-sm"
+            title="Settings"
+          />
         </div>
       </div>
     </div>
@@ -755,23 +1566,7 @@
       document.getElementById('clearChat').addEventListener('click', () => {
         document.getElementById('chatBox').innerHTML = ''
       })
-      let spamInterval
-
-      document.getElementById('checkSpam').addEventListener('change', () => {
-        const checkbox = document.getElementById('checkSpam')
-        const spamDelayInput = document.getElementById('spamDelay')
-
-        if (checkbox.checked) {
-          const delay = parseInt(spamDelayInput.value, 10) || 1000
-          document.getElementById('btnChat').click()
-          spamInterval = setInterval(() => {
-            document.getElementById('btnChat').click()
-          }, delay)
-        } else {
-          clearInterval(spamInterval)
-          spamInterval = null
-        }
-      })
+      // Spammer and chat are managed by index.js and spammerEngine
 
       // Uptime
       let botStartTime

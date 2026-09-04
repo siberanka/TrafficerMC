@@ -106,10 +106,7 @@ console.log('--- Testing Proxy Scraper & HTTP Tunnel Mechanics ---')
 // 4. Test Live Web Scraper
 {
   console.log('Testing live scrapeProxy for socks5 and http...')
-  const [socks5Result, httpResult] = await Promise.all([
-    scrapeProxy('socks5'),
-    scrapeProxy('http')
-  ])
+  const [socks5Result, httpResult] = await Promise.all([scrapeProxy('socks5'), scrapeProxy('http')])
 
   const socks5Count = socks5Result ? socks5Result.trim().split(/\r?\n/).filter(Boolean).length : 0
   const httpCount = httpResult ? httpResult.trim().split(/\r?\n/).filter(Boolean).length : 0
@@ -117,5 +114,8 @@ console.log('--- Testing Proxy Scraper & HTTP Tunnel Mechanics ---')
   assert.ok(socks5Count > 50, `Expected at least 50 SOCKS5 proxies, got ${socks5Count}`)
   assert.ok(httpCount > 50, `Expected at least 50 HTTP proxies, got ${httpCount}`)
 
-  console.log(`✓ Live scrapeProxy verified: ${socks5Count} SOCKS5 proxies, ${httpCount} HTTP proxies downloaded`)
+  console.log(
+    `✓ Live scrapeProxy verified: ${socks5Count} SOCKS5 proxies, ${httpCount} HTTP proxies downloaded`
+  )
+  process.exit(0)
 }

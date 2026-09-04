@@ -52,7 +52,9 @@ console.log('--- Running Local Server & Advanced Proxy Tests ---')
   })
   const count = psResult ? psResult.trim().split(/\r?\n/).filter(Boolean).length : 0
   assert.ok(count > 10, `Expected > 10 proxies from ProxyScrape API specifically, got ${count}`)
-  console.log(`✓ scrapeProxy (ProxyScrape API source specifically) verified: ${count} proxies fetched`)
+  console.log(
+    `✓ scrapeProxy (ProxyScrape API source specifically) verified: ${count} proxies fetched`
+  )
 }
 
 // 4. Test Local Minecraft Server with HTTP CONNECT proxy
@@ -117,15 +119,7 @@ console.log('--- Running Local Server & Advanced Proxy Tests ---')
   }
 
   // Step B: Test direct tunnel connection and packet ping through proxy
-  const socket = await connection(
-    'http',
-    '127.0.0.1',
-    PROXY_PORT,
-    null,
-    null,
-    '127.0.0.1',
-    MC_PORT
-  )
+  const socket = await connection('http', '127.0.0.1', PROXY_PORT, null, null, '127.0.0.1', MC_PORT)
   assert.ok(socket && !socket.destroyed)
   console.log('✓ Direct connection socket established through HTTP proxy')
   socket.destroy()

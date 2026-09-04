@@ -91,7 +91,7 @@ body {
 
 .title {
   display: flex;
-  justify-content: center
+  justify-content: center;
 }
 
 .title-text {
@@ -250,7 +250,7 @@ body {
   --accent-secondary: rgba(54, 41, 90, 0.3);
   --button-hover-bg: rgba(47, 1, 139, 0.1);
   --text-primary: white;
-  --text-secondary: #E6E6E6;
+  --text-secondary: #e6e6e6;
   --text-disabled: #7b7b7b;
   --discord: #7388da;
   --paypal: #026fba;

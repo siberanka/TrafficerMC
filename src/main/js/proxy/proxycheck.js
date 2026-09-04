@@ -42,8 +42,13 @@ export function checkProxy(
       }
     })
 
-    setTimeout(() => {
-      bot.end()
+    let settled = false
+    const timer = setTimeout(() => {
+      if (settled) return
+      settled = true
+      try {
+        bot.end()
+      } catch (_) {}
       const info = {
         reason: 'timeout',
         proxy: proxyHost + ':' + proxyPort
@@ -52,7 +57,12 @@ export function checkProxy(
     }, timeout)
 
     bot.on('connect', () => {
-      bot.end()
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      try {
+        bot.end()
+      } catch (_) {}
       const info = {
         reason: 'success',
         proxy: `${proxyHost}:${proxyPort}${proxyUsername ? `:${proxyUsername}` : ''}${proxyPassword ? `:${proxyPassword}` : ''}`
@@ -61,9 +71,15 @@ export function checkProxy(
     })
 
     bot.on('error', (error) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      try {
+        bot.end()
+      } catch (_) {}
       const info = {
         reason: 'bad',
-        error: error.message,
+        error: error.message || String(error),
         proxy: proxyHost + ':' + proxyPort
       }
       return reject(info)

@@ -5,7 +5,7 @@
   "main": "./out/main/index.js",
   "author": "RattlesHyper",
   "scripts": {
-    "test": "node test/resolveVersion.test.js && node test/autoAuth.test.js && node test/proxy.test.js && node test/localServer.test.js && node test/packagedApp.test.js",
+    "test": "node test/resolveVersion.test.js && node test/autoAuth.test.js && node test/spammerEngine.test.js && node test/multiBotChat.test.js && node test/consoleStreamer.test.js && node test/scriptEngine.test.js && node test/spammerDefaultsAndOptimization.test.js && node test/proxy.test.js && node test/localServer.test.js && node test/proxyLeakAndTunnel.test.js && node test/rendererChatPerf.test.js && node test/packagedApp.test.js",
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "start": "electron-vite preview",
@@ -24,7 +24,10 @@
     "lodash": "^4.18.1",
     "lodash.merge": "^4.6.2",
     "minecraft-data": "^3.115.0",
+    "minecraft-protocol": "^1.68.0",
     "mineflayer": "^4.38.0",
+    "prismarine-nbt": "^2.8.0",
+    "protodef": "^1.19.0",
     "socks": "^2.8.3",
     "uri-js": "^4.4.1"
   },

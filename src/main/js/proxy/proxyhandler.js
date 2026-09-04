@@ -60,17 +60,21 @@ export function connection(
         socket.write(connectReq)
       })
 
-      let buffer = ''
+      const chunks = []
+      let totalBytes = 0
       const onData = (chunk) => {
-        buffer += chunk.toString('latin1')
-        if (buffer.includes('\r\n\r\n')) {
+        chunks.push(chunk)
+        totalBytes += chunk.length
+        const fullBuf = Buffer.concat(chunks, totalBytes)
+        const headerEndIndex = fullBuf.indexOf(Buffer.from('\r\n\r\n'))
+        if (headerEndIndex !== -1) {
           socket.removeListener('data', onData)
           socket.setTimeout(0)
-          const [statusLine] = buffer.split('\r\n')
+          const headerString = fullBuf.subarray(0, headerEndIndex).toString('latin1')
+          const [statusLine] = headerString.split('\r\n')
           if (/^HTTP\/1\.[01]\s+200/i.test(statusLine)) {
             connected = true
-            const headerEndIndex = buffer.indexOf('\r\n\r\n') + 4
-            const rest = chunk.slice(headerEndIndex)
+            const rest = fullBuf.subarray(headerEndIndex + 4)
             if (rest.length > 0) {
               socket.unshift(rest)
             }
@@ -87,7 +91,8 @@ export function connection(
         if (!connected) reject(err.message || err)
       })
       socket.on('close', () => {
-        if (!connected) reject(new Error('HTTP proxy closed connection before tunnel establishment'))
+        if (!connected)
+          reject(new Error('HTTP proxy closed connection before tunnel establishment'))
       })
     } else {
       const socket = new Socket().connect({
