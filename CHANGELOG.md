@@ -16,6 +16,7 @@ The package and release version remains 3.6.0 while stabilization is in progress
 - Added direct Paper/AuthMe, deterministic proxy-transfer, and real Velocity/two-backend network test profiles.
 - Removed the process-wide TLS certificate-verification bypass.
 - Restricted release packaging to compiled application files and production dependencies so local test worlds, server binaries, databases, logs, and credentials cannot enter public artifacts.
+- Fixed packaged Windows builds remaining invisible because the generated `preload/index.mjs` was referenced as `preload/index.js`; window startup now has a `ready-to-show` fallback and packaged tests require a real visible HWND.
 
 ### Verified locally
 
@@ -23,4 +24,4 @@ The package and release version remains 3.6.0 while stabilization is in progress
 - Proxy-transfer harness: auth phase, `/server` command, respawn, one teleport confirmation, sub-server login, and retained play state.
 - Velocity 4.1.1 build 24: real proxy command routing from the local auth backend to the local lobby backend, re-authentication, and retained play state.
 - Full unit/integration suite and Electron production build (see the corresponding commit verification output).
-- Windows x64 portable package smoke test and archive audit; no `test/`, `test-server/`, server jar, world, database, log, or local fixture content is present in `app.asar`.
+- Windows x64 `win-unpacked` and portable packages both launched with a real visible HWND and no preload error; the archive audit found no `test/`, `test-server/`, server jar, world, database, log, or local fixture content in `app.asar`.

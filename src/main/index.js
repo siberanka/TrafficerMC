@@ -157,12 +157,16 @@ function createMainWindow() {
     maximizable: true,
     webPreferences: {
       devTools: is.dev,
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false
     }
   })
 
-  ipcMain.on('loaded', () => {
+  const showMainWindow = () => {
+    if (!mainWindow.isDestroyed() && !mainWindow.isVisible()) mainWindow.show()
+  }
+
+  const handleRendererLoaded = () => {
     store.set('version', {
       current: clientVersion
     })
@@ -173,8 +177,12 @@ function createMainWindow() {
     if (store.get('config.namefile')) {
       mainWindow.webContents.send('fileSelected', 'nameFileLabel', store.get('config.namefile'))
     }
-    mainWindow.show()
-  })
+    showMainWindow()
+  }
+
+  ipcMain.on('loaded', handleRendererLoaded)
+  mainWindow.once('ready-to-show', showMainWindow)
+  mainWindow.once('closed', () => ipcMain.removeListener('loaded', handleRendererLoaded))
 
   ipcMain.on('playerList', (event, list) => {
     playerList = Array.isArray(list) ? list.map((n) => String(n).trim()).filter(Boolean) : []
